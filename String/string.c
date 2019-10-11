@@ -383,11 +383,6 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
     return 0;
 }
 
-//BEGIN function declaration
-int my_str_create(my_str_t *str, size_t buf_size);
-void my_str_free(my_str_t *str);
-//END function declaration
-
 /* Return codes reference:
      0 - the program finished successfully.
      1 - buffer size_m too small.
