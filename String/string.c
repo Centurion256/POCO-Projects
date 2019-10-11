@@ -4,12 +4,9 @@
 //Creates a new structure(datatype)
 typedef struct
 {
-    //The current capacity_m of the string(how many places are filled)
-    size_t capacity_m;
-    //The maximum capacity_m of a string
-    size_t size_m;
-    //A character array containing the elemnts of a string.
-    char *data;
+    size_t capacity_m; // Розмір блока
+    size_t size_m;	   // Фактичний розмір стрічки
+    char*  data;	   // Вказівник на блок пам'яті
 } my_str_t;
 
 //!============================================================================
@@ -39,7 +36,8 @@ size_t my_str_capacity(const my_str_t *str)
 //! Повертає булеве значення, чи стрічка порожня:
 int my_str_empty(const my_str_t *str)
 {
-    return str->size_m == 0;
+//!    return str->size_m == 0;
+    return my_str_size(*str) == 0;
 }
 
 //!===========================================================================
@@ -53,15 +51,19 @@ int my_str_getc(const my_str_t *str, size_t index)
 {
     if (my_str_empty(str))
         return NULL;
-    if (index > str->capacity_m - 1)
+
+    if (index > str->size_m)
         return -1;
     else
     {
-        char *pt;
+/*        char *pt;
         pt = str->data;
         for (size_t i = 0; i < index - 1; ++i)
             pt++;
-        return *pt;
+        return *pt;*/
+
+    return *(str->data+index)
+
     }
 }
 
@@ -72,15 +74,16 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 {
     if (my_str_empty(str))
         return -1;
-    if (index > str->capacity_m - 1)
+    if (index > str->size_m)
         return -1;
     else
     {
-        char *pt;
+/*        char *pt;
         pt = str->data;
         for (size_t i = 0; i < index - 1; ++i)
             pt++;
-        *pt = c;
+        *pt = c;*/
+        *(str->data+index) = c;
         return 0;
     }
 }
@@ -136,6 +139,7 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
 //! лише містить 0 символів -- єдине, що вона робить, це size_m = 0.
 void my_str_clear(my_str_t *str)
 {
+    str->size_m = 0;
     return 0;
 }
 
@@ -297,6 +301,7 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
                 pt1++;
                 pt2++;
             }
+        return 0;
     }
 }
 
@@ -322,7 +327,7 @@ size_t my_str_find_c(const my_str_t *str, char tofind, size_t from)
 //! або (size_t)(-1), якщо не знайдено:
 size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
 {
-    return (1 == 1);
+    return 0;
 }
 
 //!===========================================================================
