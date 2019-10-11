@@ -111,7 +111,9 @@ const char *my_str_get_cstr(my_str_t *str)
 //! Повертає 0, якщо успішно,
 //! -1 -- якщо передано нульовий вказівник,
 //! -2 -- помилка виділення додаткової пам'яті.
-int my_str_pushback(my_str_t *str, char c);
+int my_str_pushback(my_str_t *str, char c){
+    retur 0;
+}
 
 //! Викидає символ з кінця.
 //! Повертає його, якщо успішно,
@@ -119,7 +121,15 @@ int my_str_pushback(my_str_t *str, char c);
 //! -2 -- якщо стрічка порожня.
 int my_str_popback(my_str_t *str)
 {
-    return 0;
+    if(!str){
+        return -1;
+    }
+    if(my_str_empty(str)){
+        return -2;
+    }
+    char c = my_str_getc(str, str->size-1);
+    str->size_m -=1;
+    return c;
 }
 
 //! Копіює стрічку. Якщо reserve == true,
