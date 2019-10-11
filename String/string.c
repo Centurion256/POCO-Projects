@@ -30,7 +30,7 @@ size_t my_str_capacity(const my_str_t *str)
     if (!str)
         return 0;
     else
-        return str->capacity_m - 1;
+        return str->capacity_m;
 }
 
 //! Повертає булеве значення, чи стрічка порожня:
@@ -337,7 +337,15 @@ size_t my_str_find_c(const my_str_t *str, char tofind, size_t from)
 //! або (size_t)(-1), якщо не знайдено:
 size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
 {
-    return 0;
+  if(!str){
+    return (size_t)-1;
+  }
+  for(size_t i=0; i<str->size_m; i++){
+    if(*perdicat(*(str+i))){
+      return i;
+    }
+  })
+    return (size_t)-1;
 }
 
 //!===========================================================================
@@ -401,8 +409,8 @@ int my_str_create(my_str_t *str, size_t buf_size)
         return -1;
     }
     //set the capacity_m and size_m
-    str->capacity_m = 0;
-    str->size_m = buf_size;
+    str->size_m = 0;
+    str->capacity_m = buf_size;
     //attempt to allocate enough memory for data
     str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
     //if there isn't enough memory, malloc() returns 0
