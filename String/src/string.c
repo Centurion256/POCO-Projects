@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //Creates a new structure(datatype)
 typedef struct
@@ -56,15 +57,7 @@ int my_str_getc(const my_str_t *str, size_t index)
         return -1;
     else
     {
-
-/*        char *pt;
-        pt = str->data;
-        for (size_t i = 0; i < index - 1; ++i)
-            pt++;
-        return *pt;*/
-
         return str->data[index];
-
     }
 }
 
@@ -79,11 +72,6 @@ int my_str_putc(my_str_t *str, size_t index, char c)
         return -1;
     else
     {
-/*        char *pt;
-        pt = str->data;
-        for (size_t i = 0; i < index - 1; ++i)
-            pt++;
-        *pt = c;*/
         *(str->data+index) = c;
         return 0;
     }
@@ -225,6 +213,19 @@ int my_str_substr_cstr(const my_str_t *from, char *to, size_t beg, size_t end)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_reserve(my_str_t *str, size_t buf_size)
 {
+    if (buf_size <= str->capacity_m)
+    {
+        return 0;
+    }
+    char* new_buffer = (char*)malloc(sizeof(char) * (buf_size+1));
+    if (!new_buffer)
+    {
+        free(new_buffer);
+        return 2;
+    }
+    memcpy(new_buffer, str->data, str->size_m);
+    free(str->data);
+    str->data = new_buffer;
     return 0;
 }
 
@@ -234,6 +235,15 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_shrink_to_fit(my_str_t *str)
 {
+    char* new_capacity = (char*)malloc(sizeof(char) * (str->size_m+1));
+    if (!new_capacity)
+    {
+        free(new_capacity);
+        return 2;
+    }
+    memcpy(new_capacity, str->data, str->size_m);
+    free(str->data);
+    str->data = new_capacity;
     return 0;
 }
 
@@ -247,9 +257,14 @@ int my_str_shrink_to_fit(my_str_t *str)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_resize(my_str_t *str, size_t new_size, char sym)
 {
-    /*if (new_size < str->size_m)
-		str->size_m = new_size;
-	else if (new_size < str->capacity_m - 1) {
+
+    if (new_size < str->size_m)
+    {
+	    str->size_m = new_size;
+        return 0;
+    }
+    /*
+    else if (new_size < str->capacity_m - 1) {
 		size_t difference = new_size - str->size_m;
 		char* pt;
 		pt = str->data;
