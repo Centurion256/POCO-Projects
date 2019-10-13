@@ -34,10 +34,10 @@ size_t my_str_capacity(const my_str_t *str)
 }
 
 //! Повертає булеве значення, чи стрічка порожня:
-int my_str_empty(const my_str_t *str)
+int my_str_empty(const my_str_t * str)
 {
 //!    return str->size_m == 0;
-    return my_str_size(*str) == 0;
+    return my_str_size(str) == 0;
 }
 
 //!===========================================================================
@@ -49,20 +49,21 @@ int my_str_empty(const my_str_t *str)
 //! Тому, власне, int а не char
 int my_str_getc(const my_str_t *str, size_t index)
 {
-    if (my_str_empty(str))
-        return NULL;
+    if (my_str_empty(str) == 1)
+        return -1;
 
     if (index > str->size_m)
         return -1;
     else
     {
+
 /*        char *pt;
         pt = str->data;
         for (size_t i = 0; i < index - 1; ++i)
             pt++;
         return *pt;*/
 
-    return *(str->data+index)
+        return str->data[index];
 
     }
 }
@@ -112,7 +113,7 @@ const char *my_str_get_cstr(my_str_t *str)
 //! -1 -- якщо передано нульовий вказівник,
 //! -2 -- помилка виділення додаткової пам'яті.
 int my_str_pushback(my_str_t *str, char c){
-    retur 0;
+    return 0;
 }
 
 //! Викидає символ з кінця.
@@ -127,7 +128,7 @@ int my_str_popback(my_str_t *str)
     if(my_str_empty(str)){
         return -2;
     }
-    char c = my_str_getc(str, str->size-1);
+    char c = my_str_getc(str, str->size_m-1);
     str->size_m -=1;
     return c;
 }
@@ -150,7 +151,7 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
 void my_str_clear(my_str_t *str)
 {
     str->size_m = 0;
-    return 0;
+    //return 0;
 }
 
 //! Вставити символ у стрічку в заданій позиції, змістивши решту символів праворуч.
@@ -288,14 +289,15 @@ size_t my_str_find(const my_str_t *str, const my_str_t *tofind, size_t from)
         return (size_t)-1;
     }
     size_t j = 0;
-    for (size_t i = 0; i < str->size_m; i++)
+    size_t i;
+    for (i = 0; i < str->size_m; i++)
     {
         if (j == tofind->size_m)
         {
-            //unsure wether we should add 1 to compensate for the 0-index.
+            //unsure whether we should add 1 to compensate for the 0-index.
             return i - tofind->size_m + 1;
         }
-        else if (*(my_str_t+i) == *(tofind+from+j))
+        else if (str->data[i] == tofind->data[from+j])
         {
             i++;
             j++;
@@ -323,7 +325,8 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
         char *pt1, *pt2;
         pt1 = str1->data;
         pt2 = str2->data;
-        for (size_t i = 0; i < str1->size_m; ++i)
+        size_t i;
+        for (i = 0; i < str1->size_m; i++)
             if (*pt1 < *pt2)
                 return -1;
             else if (*pt1 > *pt2)
@@ -412,11 +415,15 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
     -1 - a diffrerent error occured.
  */
 
+void my_str_free(my_str_t *str)
+{
+    free(str);
+}
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
 {
     //If the string already exists, there is no point in calling the constuctor.
-    if (str != NULL)
+    if (str->data != NULL)
     {
         //free the memory
         my_str_free(str);
@@ -436,14 +443,10 @@ int my_str_create(my_str_t *str, size_t buf_size)
     return 0;
 }
 
-void my_str_free(my_str_t *str)
-{
-    free(str);
-}
 
 int main(int argc, char *argv[])
 {
     char *word = argv[1];
-    my_str_t *string;
-    my_str_create(string, (size_t)argv[2]);
+    my_str_t string;
+    my_str_create(&string, (size_t)argv[2]);
 }
