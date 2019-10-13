@@ -62,7 +62,7 @@ int my_str_getc(const my_str_t *str, size_t index)
             pt++;
         return *pt;*/
 
-    return *(str->data+index)
+    return str->data[index]
 
     }
 }
@@ -83,7 +83,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
         for (size_t i = 0; i < index - 1; ++i)
             pt++;
         *pt = c;*/
-        *(str->data+index) = c;
+        str->data[index] = c;
         return 0;
     }
 }
@@ -96,7 +96,8 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 //! просто додати нульовий символ в кінці та повернути вказівник data.
 const char *my_str_get_cstr(my_str_t *str)
 {
-    return 0;
+    str->data[str->size_m] = 0;
+    return str->data;
 }
 
 //!===========================================================================
@@ -112,7 +113,20 @@ const char *my_str_get_cstr(my_str_t *str)
 //! -1 -- якщо передано нульовий вказівник,
 //! -2 -- помилка виділення додаткової пам'яті.
 int my_str_pushback(my_str_t *str, char c){
-    retur 0;
+    if(!str){
+      return -1;
+    }
+    if(str->size_m == str->capacity_m){
+      if(my_str_reserve(str, str->capacity_m*2+1)==0){
+        return my_str_pushback(str, c);
+      }
+      else{
+        return -2;
+      }
+    }
+    str->data[str->size_m] = c;
+    str->size_m += 1;
+    return 0;
 }
 
 //! Викидає символ з кінця.
@@ -140,7 +154,22 @@ int my_str_popback(my_str_t *str)
 //! проблеми некоректних аргументів.
 int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
 {
-    return 0;
+    //! Copy to empty?
+    if(!from){
+      return -1;
+    }
+    int new_size;
+    if(reserve){new_size = from->size_m;}
+    else{new_size = from->capacity_m;}
+    if(!to){
+      if(my_str_create(to, new_size);){
+        return -2;
+      }
+    }
+    if(my_str_reserve(to, new_size){
+      return -2;}
+    memcopy(from->data, to->data, from->size_m)
+  return 0;
 }
 
 //! Очищає стрічку -- робить її порожньою. Складність має бути О(1).
@@ -341,7 +370,7 @@ size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
     return (size_t)-1;
   }
   for(size_t i=0; i<str->size_m; i++){
-    if(*perdicat(*(str+i))){
+    if(*perdicat(my_str_getc(i)){
       return i;
     }
   })
