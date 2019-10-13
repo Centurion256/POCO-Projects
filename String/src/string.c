@@ -72,7 +72,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
         return -1;
     else
     {
-        *(str->data+index) = c;
+        str->data[index] = c;
         return 0;
     }
 }
@@ -85,7 +85,8 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 //! просто додати нульовий символ в кінці та повернути вказівник data.
 const char *my_str_get_cstr(my_str_t *str)
 {
-    return 0;
+    str->data[str->size_m] = 0;
+    return str->data;
 }
 
 //!===========================================================================
@@ -101,6 +102,19 @@ const char *my_str_get_cstr(my_str_t *str)
 //! -1 -- якщо передано нульовий вказівник,
 //! -2 -- помилка виділення додаткової пам'яті.
 int my_str_pushback(my_str_t *str, char c){
+    if(!str){
+      return -1;
+    }
+    if(str->size_m == str->capacity_m){
+      if(my_str_reserve(str, str->capacity_m*2+1)==0){
+        return my_str_pushback(str, c);
+      }
+      else{
+        return -2;
+      }
+    }
+    str->data[str->size_m] = c;
+    str->size_m += 1;
     return 0;
 }
 
@@ -129,6 +143,21 @@ int my_str_popback(my_str_t *str)
 //! проблеми некоректних аргументів.
 int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
 {
+    //! Copy to empty?
+    if(!from){
+      return -1;
+    }
+    int new_size;
+    if(reserve){new_size = from->size_m;}
+    else{new_size = from->capacity_m;}
+    if(!to){
+      if(my_str_create(to, new_size)){
+        return -2;
+      }
+    }
+    if(my_str_reserve(to, new_size)){
+      return -2;}
+    memcopy(to->data, from->data, from->size_m);
     return 0;
 }
 
@@ -371,7 +400,19 @@ size_t my_str_find_c(const my_str_t *str, char tofind, size_t from)
 //! або (size_t)(-1), якщо не знайдено:
 size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
 {
-    return 0;
+  if(!str)
+  {
+    return (size_t)-1;
+  }
+  size_t i;
+  for(i=0; i<str->size_m; i++)
+  {
+    if(perdicat(my_str_getc(str, i)))
+    {
+      return i;
+    }
+  }
+    return (size_t)-1;
 }
 
 //!===========================================================================
@@ -441,8 +482,8 @@ void my_str_free(my_str_t *str)
 int my_str_create(my_str_t *str, size_t buf_size)
 {
     //set the capacity_m and size_m
-    str->capacity_m = buf_size;
     str->size_m = 0;
+    str->capacity_m = buf_size;
     //attempt to allocate enough memory for data
     str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
     //if there isn't enough memory, malloc() returns 0
