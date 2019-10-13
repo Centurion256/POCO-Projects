@@ -224,8 +224,10 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         return 2;
     }
     memcpy(new_buffer, str->data, str->size_m);
+    memset(new_buffer+buf_size+1, '\0', 1);
     free(str->data);
     str->data = new_buffer;
+    str->size_m = buf_size;
     return 0;
 }
 
@@ -242,6 +244,7 @@ int my_str_shrink_to_fit(my_str_t *str)
         return 2;
     }
     memcpy(new_capacity, str->data, str->size_m);
+    memset(new_capacity+str->size_m+1, '\0', 1);
     free(str->data);
     str->data = new_capacity;
     return 0;
@@ -260,34 +263,25 @@ int my_str_resize(my_str_t *str, size_t new_size, char sym)
 
     if (new_size < str->size_m)
     {
+        //memcpy(str->data, str->data, new_size);
+        memset(str->data + (new_size), 0, (str->size_m - new_size));
+        memset(str->data + (str->size_m - new_size + 1), '\0', 1);
 	    str->size_m = new_size;
         return 0;
     }
-    /*
-    else if (new_size < str->capacity_m - 1) {
-		size_t difference = new_size - str->size_m;
-		char* pt;
-		pt = str->data;
-		for (size_t i = 0; i < str->size_m; ++i)
-			pt++;
-		for (size_t i = 0; i < difference; ++i) {
-			*pt = sym;
-			pt++;
-		}
-	}
-	else {
-		while (new_size > str->capacity_m - 1)
-			str->capacity_m = str->capacity_m * 2 - 1;
-		size_t difference = new_size - str->size_m;
-		char* pt;
-		pt = str->data;
-		for (size_t i = 0; i < str->size_m; ++i)
-			pt++;
-		for (size_t i = 0; i < difference; ++i) {
-			*pt = sym;
-			pt++;
-		}
-	}*/
+    else if (new_size < str->capacity_m)
+    {
+        size_t diff = new_size-str->size_m;
+        memset(str->data + str->size_m + 1, sym, diff);
+        return 0;
+    }
+    else
+    {
+        my_str_reserve(str, str->capacity_m*2);
+        //Warning! untested recursion.
+        return my_str_resize(str, new_size, sym);
+    }
+
 }
 
 //!===========================================================================
