@@ -4,4 +4,8 @@ project(my_string C)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-add_library(my_str_t SHARED ${CMAKE_CURRENT_SOURCE_DIR}/string.c ${CMAKE_CURRENT_SOURCE_DIR}/string.h) 
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/string.c ${CMAKE_CURRENT_SOURCE_DIR}/string.h)
+
+add_library(my_str_t SHARED ${SOURCES})
+#For testing purposes only!
+add_executable(str_test ${SOURCES})

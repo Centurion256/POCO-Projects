@@ -31,7 +31,7 @@ size_t my_str_capacity(const my_str_t *str)
     if (!str)
         return 0;
     else
-        return str->capacity_m - 1;
+        return str->capacity_m;
 }
 
 //! Повертає булеве значення, чи стрічка порожня:
@@ -224,7 +224,7 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         return 2;
     }
     memcpy(new_buffer, str->data, str->size_m);
-    memset(new_buffer+buf_size+1, '\0', 1);
+    memset(new_buffer+buf_size, '\0', 1);
     free(str->data);
     str->data = new_buffer;
     str->size_m = buf_size;
@@ -260,25 +260,25 @@ int my_str_shrink_to_fit(my_str_t *str)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_resize(my_str_t *str, size_t new_size, char sym)
 {
-
     if (new_size < str->size_m)
     {
-        //memcpy(str->data, str->data, new_size);
         memset(str->data + (new_size), 0, (str->size_m - new_size));
-        memset(str->data + (str->size_m - new_size + 1), '\0', 1);
+        memset(str->data + (str->size_m - new_size), '\0', 1);
 	    str->size_m = new_size;
         return 0;
     }
     else if (new_size < str->capacity_m)
     {
         size_t diff = new_size-str->size_m;
-        memset(str->data + str->size_m + 1, sym, diff);
+        memset(str->data + str->size_m, sym, diff);
+        str->size_m = new_size;
         return 0;
     }
     else
     {
-        my_str_reserve(str, str->capacity_m*2);
-        //Warning! untested recursion.
+        str->capacity_m = str->capacity_m*2;
+        my_str_reserve(str, str->capacity_m);
+        //Warning! untested recursion. - RECURSION TESTED.
         return my_str_resize(str, new_size, sym);
     }
 
@@ -405,6 +405,15 @@ int my_str_write_file(const my_str_t *str, FILE *file)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_write(const my_str_t *str, FILE *file)
 {
+    char *ptr = str->data;
+    size_t length = 0;
+    memset(ptr+str->size_m, 'X', 1);
+    while (*ptr != '\0' && length < str->size_m)
+    {
+        printf("%c",*ptr);
+        ptr++;
+        length++;
+    }
     return 0;
 }
 
@@ -431,16 +440,9 @@ void my_str_free(my_str_t *str)
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
 {
-    //If the string already exists, there is no point in calling the constuctor.
-    if (str->data != NULL)
-    {
-        //free the memory
-        my_str_free(str);
-        return -1;
-    }
     //set the capacity_m and size_m
-    str->capacity_m = 0;
-    str->size_m = buf_size;
+    str->capacity_m = buf_size;
+    str->size_m = 0;
     //attempt to allocate enough memory for data
     str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
     //if there isn't enough memory, malloc() returns 0
@@ -455,7 +457,15 @@ int my_str_create(my_str_t *str, size_t buf_size)
 
 int main(int argc, char *argv[])
 {
+    printf("I'm at the beginning!\n");
     char *word = argv[1];
+    puts(argv[1]);
+    size_t buf_size = (size_t)atoi(argv[2]);
+    printf("%u\n", buf_size);
     my_str_t string;
-    my_str_create(&string, (size_t)argv[2]);
+    my_str_create(&string, buf_size);
+    size_t leng = (size_t)strlen(word);
+    printf("%u\n", leng);
+    my_str_resize(&string, leng, 'R');
+    my_str_write(&string, stdout);
 }
