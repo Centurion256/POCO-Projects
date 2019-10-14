@@ -157,7 +157,7 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
     }
     if(my_str_reserve(to, new_size)){
       return -2;}
-    memcopy(to->data, from->data, from->size_m);
+    memcpy(to->data, from->data, from->size_m);
     return 0;
 }
 
@@ -273,7 +273,7 @@ int my_str_shrink_to_fit(my_str_t *str)
         return 2;
     }
     memcpy(new_capacity, str->data, str->size_m);
-    memset(new_capacity+str->size_m+1, '\0', 1);
+    memset(new_capacity+str->size_m, '\0', 1);
     free(str->data);
     str->data = new_capacity;
     return 0;
@@ -305,7 +305,7 @@ int my_str_resize(my_str_t *str, size_t new_size, char sym)
     }
     else
     {
-        str->capacity_m = str->capacity_m*2;
+        str->capacity_m = (str->capacity_m != 0) ? (str->capacity_m*2) : 2;
         my_str_reserve(str, str->capacity_m);
         //Warning! untested recursion. - RECURSION TESTED.
         return my_str_resize(str, new_size, sym);
@@ -407,7 +407,8 @@ size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
   size_t i;
   for(i=0; i<str->size_m; i++)
   {
-    if(perdicat(my_str_getc(str, i)))
+    //Function call syntax: (*name_of_the_function)(...)
+    if((*predicat)(my_str_getc(str, i)))
     {
       return i;
     }
@@ -448,7 +449,6 @@ int my_str_write(const my_str_t *str, FILE *file)
 {
     char *ptr = str->data;
     size_t length = 0;
-    memset(ptr+str->size_m, 'X', 1);
     while (*ptr != '\0' && length < str->size_m)
     {
         printf("%c",*ptr);
