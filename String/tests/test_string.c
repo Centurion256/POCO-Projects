@@ -19,13 +19,13 @@ void teardown(void)
 START_TEST(string_test_resize)
 {
     char rem = 'R';
-    size_t length = 1;
+    size_t length = (size_t)1;
     int i;
     for (i = 0; i<6; i++)
     {
-        length *= 10;
+        length *= (size_t)10;
         ck_assert_int_eq(my_str_resize(&string, length, rem), 0);
-        ck_assert(my_str_size(&string) == length);
+        ck_assert_msg(my_str_size(&string) == length, "my_str_size returns %zu, while length is %zu", my_str_size(&string), length);
     }
 }
 END_TEST

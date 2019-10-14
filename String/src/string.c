@@ -307,8 +307,9 @@ int my_str_resize(my_str_t *str, size_t new_size, char sym)
     }
     else
     {
-        str->capacity_m = (str->capacity_m != 0) ? (str->capacity_m*2) : 2;
-        my_str_reserve(str, str->capacity_m);
+        size_t new_capacity = (str->capacity_m != 0) ? (str->capacity_m*2) : 2;
+        my_str_reserve(str, new_capacity);
+        str->capacity_m = new_capacity;
         //Warning! untested recursion. - RECURSION TESTED.
         return my_str_resize(str, new_size, sym);
     }
@@ -478,7 +479,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
 
 void my_str_free(my_str_t *str)
 {
-    free(str);
+    free(str->data);
 }
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
@@ -497,7 +498,7 @@ int my_str_create(my_str_t *str, size_t buf_size)
     return 0;
 }
 
-
+/*
 int main(int argc, char *argv[])
 {
     printf("I'm at the beginning!\n");
@@ -512,3 +513,4 @@ int main(int argc, char *argv[])
     my_str_resize(&string, leng, 'R');
     my_str_write(&string, stdout);
 }
+*/
