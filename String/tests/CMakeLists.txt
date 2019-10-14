@@ -1,0 +1,18 @@
+find_package(Check REQUIRED)
+
+include_directories(${CHECK_INCLUDE_DIRS})
+#For Windows users, uncomment these lines and set the path to your check directory.
+#include_directories("C:/MinGW/check-0.12.0/src")
+#include_directories("C:/MinGW/check-0.12.0/")
+link_directories(${CHECK_LIBRARY_DIRS})
+#link_directories("C:/MinGW/check-0.12.0/src/.libs")
+include(CheckCSourceCompiles)
+include(CheckCSourceRuns)
+include(CheckFunctionExists)
+include(CheckTypeSize)
+
+add_executable(test_string test_string.c)
+target_link_libraries(test_string my_str_t ${CHECK_LIBRARIES})
+make_directory(${CMAKE_BINARY_DIR}/TempTests)
+add_test(NAME main_test COMMAND test_string WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/TempTests)
+set_tests_properties(main_test PROPERTIES TIMEOUT 30)

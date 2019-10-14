@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "./string.h"
 
 //Creates a new structure(datatype)
+/* 
 typedef struct
 {
     size_t capacity_m; // Розмір блока
     size_t size_m;	   // Фактичний розмір стрічки
     char*  data;	   // Вказівник на блок пам'яті
 } my_str_t;
-
+*/
 //!============================================================================
 //! Інформація про стрічку
 //!============================================================================

@@ -1,7 +1,7 @@
 //
 // Created by UserPC on 11.10.2019.
 //
-
+#include <stdio.h>
 #ifndef POCO_PROJECTS_STRING_H
 #define POCO_PROJECTS_STRING_H
 typedef struct
