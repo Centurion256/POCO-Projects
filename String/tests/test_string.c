@@ -30,15 +30,25 @@ START_TEST(string_test_resize)
 }
 END_TEST
 
+START_TEST(string_test_resize_negative)
+{
+    char rem = 'R';
+    size_t length = (size_t)0;
+    ck_assert_int_eq(my_str_resize(&string, length, rem), 0);
+    ck_assert_int_eq(my_str_size(&string), 0);
+}
+END_TEST
+
 Suite* string_actions_suite(void)
 {
     Suite* suit;
     TCase* tc_resize;
 
     suit = suite_create("Memory opertaions, copy, etc.");
-    tc_resize = tcase_create("Resize/Reserve/Shrink");
+    tc_resize = tcase_create("Resize tests");
     tcase_add_checked_fixture(tc_resize, setup, teardown);
     tcase_add_test(tc_resize, string_test_resize);
+    tcase_add_test(tc_resize, string_test_resize_negative);
 
     suite_add_tcase(suit, tc_resize);
     return suit;
