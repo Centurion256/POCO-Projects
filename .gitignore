@@ -2,3 +2,6 @@ build/
 bin/
 lib/
 .vscode/
+.idea/POCO-Projects.iml
+.idea/modules.xml
+.idea/workspace.xml

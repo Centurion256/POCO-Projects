@@ -4,7 +4,7 @@
 #include "./string.h"
 
 //Creates a new structure(datatype)
-/* 
+/*
 typedef struct
 {
     size_t capacity_m; // Розмір блока
@@ -343,11 +343,11 @@ size_t my_str_find(const my_str_t *str, const my_str_t *tofind, size_t from)
             i++;
             j++;
         }
-        else 
+        else
         {
             j = 0;
         }
-    }   
+    }
     return (size_t)0;
 }
 
@@ -395,7 +395,26 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
 //! Якщо більше за розмір -- вважати, що не знайдено.
 size_t my_str_find_c(const my_str_t *str, char tofind, size_t from)
 {
-    return 0;
+    if(!str)
+    {
+        return (size_t)-1;
+    }
+    if(from>my_str_size(str))
+    {
+        return (size_t)-1;
+    }
+    size_t i = from;
+    if(from < 0){
+        i = 0;
+    }
+    for(i; i<str->size_m; i++)
+    {
+        if(my_str_getc(str, i)==tofind)
+        {
+            return i;
+        }
+    }
+    return (size_t)-1;
 }
 
 //! Знайти символ в стрічці, для якого передана
@@ -430,19 +449,26 @@ size_t my_str_find_if(const my_str_t *str, int (*predicat)(int))
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_read_file(my_str_t *str, FILE *file)
 {
-    return 0;
+    return my_str_read_file_delim(str,file,EOF);
 }
 
 //! Аналог my_str_read_file, із stdin.
 int my_str_read(my_str_t *str)
 {
-    return 0;
+    char text[sizeof(size_t)];
+    fgets(text,sizeof(size_t),stdin);
+    return my_str_append_cstr(str, text);
 }
 
 //! Записати стрічку в файл:
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_write_file(const my_str_t *str, FILE *file)
 {
+    char *data;
+    int size=str->size_m;
+    data = str->data;
+    for(int i=0; i<size;++i,++data)
+        fputc(*data, file );
     return 0;
 }
 
@@ -467,13 +493,17 @@ int my_str_write(const my_str_t *str, FILE *file)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
 {
+    int c;
+    while ((c = fgetc(file)) != delimiter){ 
+        my_str_append_c(str, (char)c);
+    }
     return 0;
 }
 
 /* Return codes reference:
      0 - the program finished successfully.
      1 - buffer size_m too small.
-     2 - couldn't allocate enough memory/not enough memory.
+     -2 - couldn't allocate enough memory/not enough memory.
     -1 - a diffrerent error occured.
  */
 
@@ -493,7 +523,7 @@ int my_str_create(my_str_t *str, size_t buf_size)
     if (!str->data)
     {
         my_str_free(str);
-        return 2;
+        return -2;
     }
     return 0;
 }
