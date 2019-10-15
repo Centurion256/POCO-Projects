@@ -87,7 +87,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 //! просто додати нульовий символ в кінці та повернути вказівник data.
 const char *my_str_get_cstr(my_str_t *str)
 {
-    str->data[str->size_m] = 0;
+    str->data[str->size_m] = '\0';
     return str->data;
 }
 
@@ -159,7 +159,7 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
     }
     if(my_str_reserve(to, new_size)){
       return -2;}
-    memcpy(to->data, from->data, from->size_m);
+    memcpy(to->data, from->data, sizeof(char)*from->size_m);
     return 0;
 }
 
@@ -196,12 +196,39 @@ int my_str_insert_cstr(my_str_t *str, const char *from, size_t pos)
 {
     return 0;
 }
-
+//! Додати символ в кінець.
+//! За потреби -- збільшує буфер.
+//! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
+int my_str_append_c(my_str_t *str, char c)
+{
+    if(!str){
+        return -1;
+    }
+    int err_code = my_str_reserve(str, my_str_size(str)+1);
+    if(err_code){
+        return -2;
+    }
+    str->size_m += 1;
+    str->data[size_m-1] = c;
+    return 0;
+}
 //! Додати стрічку в кінець.
 //! За потреби -- збільшує буфер.
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_append(my_str_t *str, const my_str_t *from)
 {
+    if(!str){
+        return -1;
+    }
+    if(!from){
+        return -1;
+    }
+    int err_code = my_str_reserve(str, my_str_size(str)+my_str_size(from));
+    if(err_code){
+        return -2;
+    }
+    memcpy(str->data+my_str_size(str), from->data, sizeof(char)*my_str_size(from));
+    str->size_m += from->size_m;
     return 0;
 }
 
@@ -254,8 +281,8 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         free(new_buffer);
         return 2;
     }
-    memcpy(new_buffer, str->data, str->size_m);
-    memset(new_buffer+buf_size, '\0', 1);
+    memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+    memset(new_buffer+buf_size, '\0', sizeof(char)*1);
     free(str->data);
     str->data = new_buffer;
     str->size_m = buf_size;
@@ -274,8 +301,8 @@ int my_str_shrink_to_fit(my_str_t *str)
         free(new_capacity);
         return 2;
     }
-    memcpy(new_capacity, str->data, str->size_m);
-    memset(new_capacity+str->size_m, '\0', 1);
+    memcpy(new_capacity, str->data, sizeof(char)*str->size_m);
+    memset(new_capacity+str->size_m, '\0', sizeof(char)*1);
     free(str->data);
     str->data = new_capacity;
     return 0;
@@ -293,15 +320,15 @@ int my_str_resize(my_str_t *str, size_t new_size, char sym)
 {
     if (new_size < str->size_m)
     {
-        memset(str->data + (new_size), 0, (str->size_m - new_size));
-        memset(str->data + (str->size_m - new_size), '\0', 1);
+        memset(str->data + (new_size), 0, sizeof(char)*(str->size_m - new_size));
+        memset(str->data + (str->size_m - new_size), '\0', sizeof(char)*1);
 	    str->size_m = new_size;
         return 0;
     }
     else if (new_size < str->capacity_m)
     {
         size_t diff = new_size-str->size_m;
-        memset(str->data + str->size_m, sym, diff);
+        memset(str->data + str->size_m, sym, sizeof(char)*diff);
         str->size_m = new_size;
         return 0;
     }
