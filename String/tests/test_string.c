@@ -38,7 +38,7 @@ Suite* string_actions_suite(void)
     suit = suite_create("Memory opertaions, copy, etc.");
     tc_resize = tcase_create("Resize/Reserve/Shrink");
     tcase_add_checked_fixture(tc_resize, setup, teardown);
-    tcase_add_test(tc_resize, string_test_resize);
+    tcase_add_test(tc_resize, string_test_resize);  
 
     suite_add_tcase(suit, tc_resize);
     return suit;
