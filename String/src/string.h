@@ -134,7 +134,7 @@ int my_str_insert_cstr(my_str_t* str, const char* from, size_t pos);
 //! Додати символ в кінець.
 //! За потреби -- збільшує буфер.
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_append_c(my_str_t *str, char c)
+int my_str_append_c(my_str_t *str, char c);
 
 //! Додати стрічку в кінець.
 //! За потреби -- збільшує буфер.

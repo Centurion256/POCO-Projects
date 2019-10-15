@@ -187,8 +187,8 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
     if(err_code){
         return -2;
     }
-    memmove(size->data+sizeof(char)*(pos+1), size->data+sizeof(char)*pos, sizeof(char)*1);
-    memset(size->data+sizeof(char)*pos, c, sizeof(char)*1)
+    memmove(str->data+sizeof(char)*(pos+1), str->data+sizeof(char)*pos, sizeof(char)*1);
+    memset(str->data+sizeof(char)*pos, c, sizeof(char)*1);
     return 0;
 }
 
@@ -207,8 +207,8 @@ int my_str_insert(my_str_t *str, const my_str_t *from, size_t pos)
     if(err_code){
         return -2;
     }
-    memmove(size->data+sizeof(char)*(pos+my_str_size(from)), size->data+sizeof(char)*pos, sizeof(char)*my_str_size(from));
-    memcpy(size->data+sizeof(char)*pos, from->data, sizeof(char)*my_str_size(from));
+    memmove(str->data+sizeof(char)*(pos+my_str_size(from)), str->data+sizeof(char)*pos, sizeof(char)*my_str_size(from));
+    memcpy(str->data+sizeof(char)*pos, from->data, sizeof(char)*my_str_size(from));
     return 0;
 }
 
@@ -232,7 +232,7 @@ int my_str_append_c(my_str_t *str, char c)
         return -2;
     }
     str->size_m += 1;
-    str->data[size_m-1] = c;
+    str->data[str->size_m-1] = c;
     return 0;
 }
 //! Додати стрічку в кінець.
