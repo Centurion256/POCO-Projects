@@ -4,7 +4,7 @@
 #include "./string.h"
 
 //Creates a new structure(datatype)
-/* 
+/*
 typedef struct
 {
     size_t capacity_m; // Розмір блока
@@ -343,11 +343,11 @@ size_t my_str_find(const my_str_t *str, const my_str_t *tofind, size_t from)
             i++;
             j++;
         }
-        else 
+        else
         {
             j = 0;
         }
-    }   
+    }
     return (size_t)0;
 }
 
@@ -395,7 +395,26 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
 //! Якщо більше за розмір -- вважати, що не знайдено.
 size_t my_str_find_c(const my_str_t *str, char tofind, size_t from)
 {
-    return 0;
+    if(!str)
+    {
+        return (size_t)-1;
+    }
+    if(from>my_str_size(str))
+    {
+        return (size_t)-1;
+    }
+    size_t i = from;
+    if(from < 0){
+        i = 0;
+    }
+    for(i; i<str->size_m; i++)
+    {
+        if(my_str_getc(str, i)==tofind)
+        {
+            return i;
+        }
+    }
+    return (size_t)-1;
 }
 
 //! Знайти символ в стрічці, для якого передана
