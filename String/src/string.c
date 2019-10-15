@@ -309,13 +309,13 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
     if (!new_buffer)
     {
         free(new_buffer);
-        return 2;
+        return -2;
     }
     memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
     memset(new_buffer+buf_size, '\0', sizeof(char)*1);
     free(str->data);
     str->data = new_buffer;
-    str->size_m = buf_size;
+    str->capacity_m = buf_size;
     return 0;
 }
 
@@ -335,6 +335,7 @@ int my_str_shrink_to_fit(my_str_t *str)
     memset(new_capacity+str->size_m, '\0', sizeof(char)*1);
     free(str->data);
     str->data = new_capacity;
+    str->capacity_m = str->size_m;
     return 0;
 }
 
