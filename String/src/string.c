@@ -170,7 +170,6 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
 void my_str_clear(my_str_t *str)
 {
     str->size_m = 0;
-    //return 0;
 }
 
 //! Вставити символ у стрічку в заданій позиції, змістивши решту символів праворуч.
@@ -178,6 +177,18 @@ void my_str_clear(my_str_t *str)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_insert_c(my_str_t *str, char c, size_t pos)
 {
+    if(!str){
+        return -1;
+    }
+    if(pos<0 || pos>my_str_size(str)){
+        return -1;
+    }
+    int err_code = my_str_reserve(str, my_str_size(str)+1);
+    if(err_code){
+        return -2;
+    }
+    memmove(size->data+sizeof(char)*(pos+1), size->data+sizeof(char)*pos, sizeof(char)*1);
+    memset(size->data+sizeof(char)*pos, c, sizeof(char)*1)
     return 0;
 }
 
@@ -186,6 +197,18 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_insert(my_str_t *str, const my_str_t *from, size_t pos)
 {
+    if(!str||!from){
+        return -1;
+    }
+    if(pos<0 || pos>my_str_size(str)){
+        return -1;
+    }
+    int err_code = my_str_reserve(str, my_str_size(str)+my_str_size(from));
+    if(err_code){
+        return -2;
+    }
+    memmove(size->data+sizeof(char)*(pos+my_str_size(from)), size->data+sizeof(char)*pos, sizeof(char)*my_str_size(from));
+    memcpy(size->data+sizeof(char)*pos, from->data, sizeof(char)*my_str_size(from));
     return 0;
 }
 
@@ -247,6 +270,13 @@ int my_str_append_cstr(my_str_t *str, const char *from)
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_substr(const my_str_t *from, my_str_t *to, size_t beg, size_t end)
 {
+    if(!from || !to){
+        return -1;
+    }
+    if(beg>=my_str_size(from)||beg<0){
+        return -1;
+    }
+    // To finish..
     return 0;
 }
 
