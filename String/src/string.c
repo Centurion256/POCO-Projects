@@ -466,24 +466,21 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
         return -1;
     else if (str1->size_m > str2->size_m)
         return 1;
-    else
-    {
-        char *pt1, *pt2;
-        pt1 = str1->data;
-        pt2 = str2->data;
-        size_t i;
-        for (i = 0; i < str1->size_m; i++)
-            if (*pt1 < *pt2)
-                return -1;
-            else if (*pt1 > *pt2)
-                return 1;
-            else
-            {
-                pt1++;
-                pt2++;
-            }
-        return 0;
-    }
+    int char1, char2;
+    int i = 0;
+    do{
+        char1 = my_str_getc(str1, i);
+        char2 = my_str_getc(str2, i);
+        if (char1>char2){
+            return 1;
+        }
+        if (char1<char2){
+            return -1;
+        }
+        i+=1;
+    }while(char1 != '\n');
+    return 0;
+    
 }
 
 //! Порівняти стрічку із С-стрічкою, повернути 0, якщо рівні (за вмістом!)
