@@ -478,7 +478,7 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
             return -1;
         }
         i+=1;
-    }while(char1 != '\n');
+    }while((i < my_str_size(str1))||(i< my_str_size(str2)));
     return 0;
     
 }
