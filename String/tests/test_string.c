@@ -79,7 +79,6 @@ START_TEST(string_test_reserve_normal_buffer)
     ck_assert_int_eq(my_str_reserve(&string, (size_t)200), 0);
     ck_assert_int_eq(my_str_size(&string), initial_size);
     ck_assert_int_eq(my_str_capacity(&string), (size_t)200);
-    //ck_assert_str_eq(my_str_get_cstr(&string), original_str);
 }
 END_TEST
 
@@ -91,6 +90,20 @@ START_TEST(string_test_reserve_giant_buffer)
     my_str_resize(&string, length, length);
 
     ck_assert_int_eq(my_str_reserve(&string, (size_t)1844674407370955161), -2); //2^64/10
+}
+END_TEST
+
+START_TEST(string_test_size)
+{
+    ck_assert_int_eq(my_str_size(&string), 0);
+}
+END_TEST
+
+START_TEST(string_test_size_10)
+{
+    my_str_resize(&string, 10, 0);
+    ck_assert_int_eq(my_str_size(&string), 0);
+
 }
 END_TEST
 
@@ -124,14 +137,31 @@ Suite* string_actions_suite(void)
     return suit;
 }
 
+Suite* string_test_info_suite(void)
+{
+    Suite* suit;
+    TCase* tc_size;
+    TCase* tc_capacity;
+    TCase* tc_empty;
+
+    suit = suite_create("String info");
+
+    tc_size = tcase_create("Size test");
+    tcase_add_checked_fixture(tc_size, setup, teardown);
+    tcase_add_test(tc_size, string_test_size);
+    tcase_add_test(tc_size, string_test_size_10);
+    return suit;    
+}
+
 int main(void)
 {
     int failures = 0;
     SRunner *run;
 
     run = srunner_create(string_actions_suite());
+    srunner_add_suite(run, string_test_info_suite());
     srunner_set_fork_status(run, CK_NOFORK);
-    srunner_run_all(run, CK_VERBOSE);
+    srunner_run_all(run, CK_NORMAL);
     failures = srunner_ntests_failed(run);
     srunner_free(run);
     return (failures == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
