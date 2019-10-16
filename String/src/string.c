@@ -330,7 +330,7 @@ int my_str_substr_cstr(const my_str_t *from, char *to, size_t beg, size_t end)
     if(end >= my_str_size(from)){
         end = my_str_size(from)-1;
     }
-    memset(to+sizeof(char) *(end-beg+1), '/0', sizeof(char)*1);
+    memset(to+sizeof(char) *(end-beg+1), '\0', sizeof(char)*1);
     return 0;
 }
 
@@ -600,7 +600,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
 {
     int c;
     while ((c = fgetc(file)) != delimiter){ 
-        my_str_append_c(str, (char)c);
+        my_str_pushback(str, (char)c);
     }
     return 0;
 }
