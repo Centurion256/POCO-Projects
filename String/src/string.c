@@ -462,10 +462,6 @@ size_t my_str_find(const my_str_t *str, const my_str_t *tofind, size_t from)
 //! Поведінка має бути такою ж, як в strcmp.
 int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
 {
-    if (str1->size_m < str2->size_m)
-        return -1;
-    else if (str1->size_m > str2->size_m)
-        return 1;
     int char1, char2;
     int i = 0;
     do{
