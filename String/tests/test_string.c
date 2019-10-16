@@ -21,12 +21,12 @@ void teardown(void)
 
 void setup2(void){
     setup();
-    my_str_create(string2, 0)
+    my_str_create(&string2, 0);
 }
 
 void teardown2(void){
     teardown();
-    my_str_free(string2);
+    my_str_free(&string2);
 }
 
 START_TEST(string_test_resize)
@@ -92,7 +92,6 @@ START_TEST(string_test_reserve_normal_buffer)
     ck_assert_int_eq(my_str_reserve(&string, (size_t)200), 0);
     ck_assert_int_eq(my_str_size(&string), initial_size);
     ck_assert_int_eq(my_str_capacity(&string), (size_t)200);
-    //ck_assert_str_eq(my_str_get_cstr(&string), original_str);
 }
 END_TEST
 
@@ -104,6 +103,20 @@ START_TEST(string_test_reserve_giant_buffer)
     my_str_resize(&string, length, length);
 
     ck_assert_int_eq(my_str_reserve(&string, (size_t)1844674407370955161), -2); //2^64/10
+}
+END_TEST
+
+START_TEST(string_test_size)
+{
+    ck_assert_int_eq(my_str_size(&string), 0);
+}
+END_TEST
+
+START_TEST(string_test_size_10)
+{
+    my_str_resize(&string, 10, 0);
+    ck_assert_int_eq(my_str_size(&string), 0);
+
 }
 END_TEST
 
@@ -137,59 +150,77 @@ Suite* string_actions_suite(void)
     return suit;
 }
 
+Suite* string_test_info_suite(void)
+{
+    Suite* suit;
+    TCase* tc_size;
+    TCase* tc_capacity;
+    TCase* tc_empty;
 
+    suit = suite_create("String info");
+
+    tc_size = tcase_create("Size test");
+    tcase_add_checked_fixture(tc_size, setup, teardown);
+    tcase_add_test(tc_size, string_test_size);
+    tcase_add_test(tc_size, string_test_size_10);
+    return suit;    
+}
+
+int signum(int x)
+{
+    return (x > 0) - (x < 0);
+}
 
 START_TEST(string_test_cmp_empty)
 {
-    ck_assert_int_eq(my_str_cmp(string1, string2), 0);
+    ck_assert_int_eq(my_str_cmp( &string, &string2), 0);
+
 }END_TEST
 
 START_TEST(string_test_cmp_same)
 {
-    my_str_resize(string1, 10, 'a');
-    my_str_resize(string2, 10, 'a');
-    ck_assert_int_eq(my_str_cmp(string1, string2), 
-                     strcmp(my_str_get_cstr(string1), my_str_get_cstr(string1))
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 10, 'a');
+    ck_assert_int_eq(signum(my_str_cmp(&string, &string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
 
+
 START_TEST(string_test_cmp_diff_size_same_chars)
 {   
-    my_str_resize(string1, 10, 'a');
-    my_str_resize(string1, 12, 'a');
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 12, 'a');
 
-    ck_assert_int_eq(my_str_cmp(string1, string2), 
-                     strcmp(my_str_get_cstr(string1), my_str_get_cstr(string1))
+    ck_assert_int_eq(signum(my_str_cmp(&string, &string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
 
 START_TEST(string_test_cmp_diff_size_diff_chars)
 {   
-    my_str_resize(string1, 10, 'a');
-    my_str_resize(string1, 12, 'a');
-    my_str_putc(string1, 2, 'b');
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 12, 'a');
+    my_str_putc(&string, 2, 'b');
 
-    ck_assert_int_eq(my_str_cmp(string1, string2), 
-                     strcmp(my_str_get_cstr(string1), my_str_get_cstr(string1))
+    ck_assert_int_eq(signum(my_str_cmp(&string, &string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
 
 START_TEST(string_test_cmp_same_size_diff_chars)
 {
-    my_str_resize(string1, 10, 'a');
-    my_str_resize(string2, 10, 'a');
-    my_str_putc(string2, 2, 'b');
-    ck_assert_int_eq(my_str_cmp(string1, string2), 
-                        strcmp(my_str_get_cstr(string1), my_str_get_cstr(string1))
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 10, 'a');
+    my_str_putc(&string2, 2, 'b');
+    ck_assert_int_eq(signum(my_str_cmp(&string, &string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
 
-
-
-
 Suite* string_cmps_suite(void){
     Suite* suit;
-    Tcase* tc_cmp;
+    TCase* tc_cmp;
 
     suit = suite_create("Stirng comparisons");
 
@@ -212,9 +243,11 @@ int main(void)
     int failures = 0;
     SRunner *run;
 
-    run = srunner_create(string_actions_suite(), string_cmps_suite());
+    run = srunner_create(string_actions_suite());
+    srunner_add_suite(run, string_test_info_suite());
+    srunner_add_suite(run, string_cmps_suite());
     srunner_set_fork_status(run, CK_NOFORK);
-    srunner_run_all(run, CK_VERBOSE);
+    srunner_run_all(run, CK_NORMAL);
     failures = srunner_ntests_failed(run);
     srunner_free(run);
     return (failures == 0) ? EXIT_SUCCESS : EXIT_FAILURE;

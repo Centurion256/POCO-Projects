@@ -609,7 +609,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
 {
     int c;
     while ((c = fgetc(file)) != delimiter){ 
-        my_str_append_c(str, (char)c);
+        my_str_pushback(str, (char)c);
     }
     return 0;
 }
