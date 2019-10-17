@@ -611,8 +611,13 @@ int my_str_write(const my_str_t *str)
 int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
 {
     int c;
-    while ((c = fgetc(file)) != delimiter){ 
+    do{
+        c = fgets(file);
         my_str_pushback(str, (char)c);
+    }
+    while (c != delimiter || c != EOF);
+    if (c == EOF){
+        return 1;
     }
     return 0;
 }
@@ -656,6 +661,21 @@ int my_str_create(my_str_t *str, size_t buf_size)
     if(my_str_reserve(str, buf_size)){
         return -2;
     }
+    return 0;
+}
+
+int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
+    cstr_len = my_str_cstr_len(cstr);
+    if (buf_size == 0) {
+        buf_size = cstr_len;
+    }
+    if (buf_size < cstr_len){
+        return -1;
+    }
+    if (my_str_reserve(str, buf_size) != 0) {
+        return -2;
+    }
+    memmove(str->data, cstr, buf_size*sizeof(char));
     return 0;
 }
 
