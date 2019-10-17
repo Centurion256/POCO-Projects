@@ -358,9 +358,12 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         free(new_buffer);
         return -2;
     }
-    memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+
+    if(str->data){
+        memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+        free(str->data);
+    }
     memset(new_buffer+buf_size, '\0', sizeof(char)*1);
-    free(str->data);
     str->data = new_buffer;
     str->capacity_m = buf_size;
     return 0;
@@ -647,15 +650,10 @@ void my_str_free(my_str_t *str)
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
 {
-    //set the capacity_m and size_m
     str->size_m = 0;
-    str->capacity_m = buf_size;
-    //attempt to allocate enough memory for data
-    str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
-    //if there isn't enough memory, malloc() returns 0
-    if (!str->data)
-    {
-        my_str_free(str);
+    str->capacity_m = 0;
+    str->data = NULL;
+    if(my_str_reserve(str, buf_size)){
         return -2;
     }
     return 0;
