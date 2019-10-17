@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
     int c;
     int letter;
     do{
-        c = my_str_read_file_delim(word, read_file, " ");
+        c = my_str_read_file_delim_if(word, read_file, isalpha());
         number_of_words += 1;
-        for (size_t i = 1; i < my_str_size(word) + 1; i++){
-            letter = my_str_getc(i - 1);
-            if isalpha(letter){
+        size_t i;
+        for (i = 0; i < my_str_size(word); i++){
+            if isalpha(my_str_getc(i)){
                 words_len += 1;
             }
         }

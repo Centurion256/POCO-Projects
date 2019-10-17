@@ -36,6 +36,15 @@ size_t my_str_capacity(const my_str_t *str)
         return str->capacity_m;
 }
 
+size_t my_str_cstr_len(const char* cstr){
+    size_t res = 0;
+    do{
+        res +=1;
+    }while(cstr[res] != '\n');
+    return res-1;
+
+}
+
 //! Повертає булеве значення, чи стрічка порожня:
 int my_str_empty(const my_str_t * str)
 {
@@ -644,6 +653,21 @@ int my_str_create(my_str_t *str, size_t buf_size)
         my_str_free(str);
         return -2;
     }
+    return 0;
+}
+
+int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
+    cstr_len = my_str_cstr_len(cstr);
+    if (buf_size == 0) {
+        buf_size = cstr_len;
+    }
+    if (buf_size < cstr_len){
+        return -1;
+    }
+    if (my_str_reserve(str, buf_size) != 0) {
+        return -2;
+    }
+    memmove(str->data, cstr, buf_size*sizeof(char));
     return 0;
 }
 
