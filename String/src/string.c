@@ -64,7 +64,7 @@ int my_str_getc(const my_str_t *str, size_t index)
     if (my_str_empty(str) == 1)
         return -1;
 
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -79,7 +79,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 {
     if (my_str_empty(str))
         return -1;
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -116,16 +116,10 @@ int my_str_pushback(my_str_t *str, char c){
     if(!str){
       return -1;
     }
-    if(str->size_m == str->capacity_m){
-      if(my_str_reserve(str, str->capacity_m*2+1)==0){
-        return my_str_pushback(str, c);
-      }
-      else{
-        return -2;
-      }
+    if(my_str_resize(str, my_str_size(str)+1, 0)){
+    return -2;
     }
     str->data[str->size_m] = c;
-    str->size_m += 1;
     return 0;
 }
 
@@ -193,12 +187,13 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
     if(pos<0 || pos>my_str_size(str)){
         return -1;
     }
-    int err_code = my_str_reserve(str, my_str_size(str)+1);
-    if(err_code){
+    if(my_str_resize(str, my_str_size(str)+1, '\0')){
         return -2;
     }
+    
     memmove(str->data+sizeof(char)*(pos+1), str->data+sizeof(char)*pos, sizeof(char)*1);
     memset(str->data+sizeof(char)*pos, c, sizeof(char)*1);
+    str->size_m+=1;
     return 0;
 }
 
@@ -213,8 +208,7 @@ int my_str_insert(my_str_t *str, const my_str_t *from, size_t pos)
     if(pos<0 || pos>my_str_size(str)){
         return -1;
     }
-    int err_code = my_str_reserve(str, my_str_size(str)+my_str_size(from));
-    if(err_code){
+    if(my_str_resize(str, my_str_size(str) + my_str_size(from),0)){
         return -2;
     }
     memmove(str->data+sizeof(char)*(pos+my_str_size(from)), str->data+sizeof(char)*pos, sizeof(char)*my_str_size(from));
@@ -234,8 +228,8 @@ int my_str_insert_cstr(my_str_t *str, const char *from, size_t pos)
         return -1;
     }
 
-    size_t csize = strlen(from);
-    if(my_str_reserve(str, my_str_size(str)+csize)){
+    size_t csize = my_str_cstr_len(from);
+    if(my_str_resize(str, my_str_size(str)+csize, 0)){
         return -2;
     }
     memmove(str->data+sizeof(char)*(pos+csize), str->data+sizeof(char)*pos, sizeof(char)*csize);
@@ -272,12 +266,10 @@ int my_str_append(my_str_t *str, const my_str_t *from)
     if(!from){
         return -1;
     }
-    int err_code = my_str_reserve(str, my_str_size(str)+my_str_size(from));
-    if(err_code){
+    if(my_str_resize(str, my_str_size(str)+my_str_size(from), 0)){
         return -2;
     }
     memcpy(str->data+my_str_size(str), from->data, sizeof(char)*my_str_size(from));
-    str->size_m += from->size_m;
     return 0;
 }
 
@@ -292,12 +284,11 @@ int my_str_append_cstr(my_str_t *str, const char *from)
     if(!from){
         return -1;
     }
-    size_t csize = strlen(from);
-    if(my_str_reserve(str, my_str_size(str)+csize)){
+    size_t csize = my_str_cstr_len(from);
+    if(my_str_resize(str, my_str_size(str)+csize, 0)){
         return -2;
     }
     memcpy(str->data+my_str_size(str), from, sizeof(char)*csize);
-    str->size_m += csize;
     
     return 0;
 }
@@ -319,7 +310,7 @@ int my_str_substr(const my_str_t *from, my_str_t *to, size_t beg, size_t end)
         end = my_str_size(from)-1;
     }
     my_str_clear(to);
-    if(my_str_reserve(to, end-beg)){
+    if(my_str_resize(to, end-beg, 0)){
         return -2;
     }
     memcpy(to->data, from->data+(sizeof(char)*beg), sizeof(char) *(end-beg));
@@ -597,7 +588,7 @@ int my_str_write_file(const my_str_t *str, FILE *file)
 
 //! Записати стрічку на консоль:
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_write(const my_str_t *str, FILE *file)
+int my_str_write(const my_str_t *str)
 {
     char *ptr = str->data;
     size_t length = 0;
@@ -614,7 +605,7 @@ int my_str_write(const my_str_t *str, FILE *file)
 //! читає по вказаний delimiter, за потреби
 //! збільшує стрічку.
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
+int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
 {
     int c;
     do{
@@ -628,11 +619,30 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
     return 0;
 }
 
+//! Читає файл доки передана функція не поверне true, за потреби
+//! збільшує стрічку.
+//! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
+int my_str_read_file_delim_if(my_str_t *str, FILE *file, int (*predicat)(int))
+{
+    my_str_clear(str);
+    int c;
+    c = fgetc(file);
+    while(!( (*predicat)(c) || c==EOF)){
+        my_str_pushback(str, (char)c);
+        c = fgetc(file);
+    }
+    if(c==EOF){
+        return 1;
+    }
+    return 0;
+}
+
+
 /* Return codes reference:
-     0 - the program finished successfully.
-     1 - buffer size_m too small.
-     -2 - couldn't allocate enough memory/not enough memory.
-    -1 - a diffrerent error occured.
+     0 - Success.
+     1 - End of file.
+     -2 - Couldn't allocate enough memory/not enough memory.
+    -1 - Invalid arguments.
  */
 
 void my_str_free(my_str_t *str)
@@ -681,7 +691,7 @@ int main(int argc, char *argv[])
     printf("%u\n", buf_size);
     my_str_t string;
     my_str_create(&string, buf_size);
-    size_t leng = (size_t)strlen(word);
+    size_t leng = (size_t)my_str_cstr_len(word);
     printf("%u\n", leng);
     my_str_resize(&string, leng, 'R');
     my_str_write(&string, stdout);

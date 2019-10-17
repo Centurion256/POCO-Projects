@@ -218,9 +218,58 @@ START_TEST(string_test_cmp_same_size_diff_chars)
                     );
 }END_TEST
 
+START_TEST(string_test_cmp_empty_cstr)
+{
+    ck_assert_int_eq(my_str_cmp( &string, my_str_get_cstr(&string2)), 0);
+
+}END_TEST
+
+START_TEST(string_test_cmp_same_cstr)
+{
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 10, 'a');
+    ck_assert_int_eq(signum(my_str_cmp(&string, my_str_get_cstr(&string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
+                    );
+}END_TEST
+
+
+START_TEST(string_test_cmp_diff_size_same_chars_cstr)
+{   
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 12, 'a');
+
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
+                    );
+}END_TEST
+
+START_TEST(string_test_cmp_diff_size_diff_chars_cstr)
+{   
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 12, 'a');
+    my_str_putc(&string, 2, 'b');
+
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2))), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
+                    );
+}END_TEST
+
+START_TEST(string_test_cmp_same_size_diff_chars_cstr)
+{
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string2, 10, 'a');
+    my_str_putc(&string2, 2, 'b');
+    ck_assert_int_eq(signum(my_str_cmp(&string, my_str_get_cstr(&string2)), 
+                     signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
+                    );
+}END_TEST
+
+
 Suite* string_cmps_suite(void){
     Suite* suit;
     TCase* tc_cmp;
+    TCase* tc_cmp_cstr;
 
     suit = suite_create("Stirng comparisons");
 
@@ -232,9 +281,17 @@ Suite* string_cmps_suite(void){
     tcase_add_test(tc_cmp, string_test_cmp_diff_size_diff_chars);
     tcase_add_test(tc_cmp, string_test_cmp_same_size_diff_chars);
 
+    tc_cmp_cstr = tcase_create("Compare with cstring tests ");
+    tcase_add_checked_fixture(tc_cmp_cstr, setup2, teardown2);
+    tcase_add_test(tc_cmp_cstr, string_test_cmp_empty_cstr);
+    tcase_add_test(tc_cmp_cstr, string_test_cmp_same_cstr);
+    tcase_add_test(tc_cmp_cstr, string_test_cmp_diff_size_same_chars_cstr);
+    tcase_add_test(tc_cmp_cstr, string_test_cmp_diff_size_diff_chars_cstr);
+    tcase_add_test(tc_cmp_cstr, string_test_cmp_same_size_diff_chars_cstr);
 
 
     suite_add_tcase(suit, tc_cmp);
+    suite_add_tcase(suit, tc_cmp_cstr);
     return suit;
 }
 

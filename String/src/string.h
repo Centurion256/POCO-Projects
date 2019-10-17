@@ -238,12 +238,12 @@ int my_str_write_file(const my_str_t* str, FILE* file);
 
 //! Записати стрічку на консоль:
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_write(const my_str_t* str, FILE* file);
+int my_str_write(const my_str_t* str);
 
 //! На відміну від my_str_read_file(), яка читає до кінця файлу,
 //! читає по вказаний delimiter, за потреби
 //! збільшує стрічку.
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_read_file_delim(my_str_t* str, FILE* file, char delimiter);
+int my_str_read_file_delim(my_str_t* str, FILE* file, int delimiter);
 
 #endif //POCO_PROJECTS_STRING_H
