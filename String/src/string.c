@@ -590,7 +590,7 @@ int my_str_write_file(const my_str_t *str, FILE *file)
 
 //! Записати стрічку на консоль:
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_write(const my_str_t *str, FILE *file)
+int my_str_write(const my_str_t *str)
 {
     char *ptr = str->data;
     size_t length = 0;
@@ -616,11 +616,30 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
     return 0;
 }
 
+//! Читає файл доки передана функція не поверне true, за потреби
+//! збільшує стрічку.
+//! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
+int my_str_read_file_delim_if(my_str_t *str, FILE *file, int (*predicat)(int))
+{
+    my_str_clear(str);
+    int c;
+    c = fgetc(file);
+    while(!( (*predicat)(c) || c==EOF)){
+        my_str_pushback(str, (char)c);
+        c = fgetc(file);
+    }
+    if(c==EOF){
+        return 1;
+    }
+    return 0;
+}
+
+
 /* Return codes reference:
-     0 - the program finished successfully.
-     1 - buffer size_m too small.
-     -2 - couldn't allocate enough memory/not enough memory.
-    -1 - a diffrerent error occured.
+     0 - Success.
+     1 - End of file.
+     -2 - Couldn't allocate enough memory/not enough memory.
+    -1 - Invalid arguments.
  */
 
 void my_str_free(my_str_t *str)

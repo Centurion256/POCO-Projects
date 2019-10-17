@@ -239,7 +239,7 @@ START_TEST(string_test_cmp_diff_size_same_chars_cstr)
     my_str_resize(&string, 10, 'a');
     my_str_resize(&string2, 12, 'a');
 
-    ck_assert_int_eq(signum(my_str_cmp(&string, my_str_get_cstr(&string2)), 
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2)), 
                      signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
