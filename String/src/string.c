@@ -64,7 +64,7 @@ int my_str_getc(const my_str_t *str, size_t index)
     if (my_str_empty(str) == 1)
         return -1;
 
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -79,7 +79,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 {
     if (my_str_empty(str))
         return -1;
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -120,7 +120,6 @@ int my_str_pushback(my_str_t *str, char c){
     return -2;
     }
     str->data[str->size_m] = c;
-    str->size_m += 1;
     return 0;
 }
 
@@ -188,11 +187,10 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
     if(pos<0 || pos>my_str_size(str)){
         return -1;
     }
-    if(my_str_size(str)==my_str_capacity(str)){
-        if(my_str_reserve(str, 2*my_str_capacity(str))){
-            return -2;
-        }
+    if(my_str_resize(str, my_str_size(str)+1, '\0')){
+        return -2;
     }
+    
     memmove(str->data+sizeof(char)*(pos+1), str->data+sizeof(char)*pos, sizeof(char)*1);
     memset(str->data+sizeof(char)*pos, c, sizeof(char)*1);
     str->size_m+=1;
