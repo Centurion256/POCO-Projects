@@ -608,8 +608,13 @@ int my_str_write(const my_str_t *str, FILE *file)
 int my_str_read_file_delim(my_str_t *str, FILE *file, char delimiter)
 {
     int c;
-    while ((c = fgetc(file)) != delimiter){ 
+    do{
+        c = fgets(file);
         my_str_pushback(str, (char)c);
+    }
+    while (c != delimiter || c != EOF);
+    if (c == EOF){
+        return 1;
     }
     return 0;
 }
