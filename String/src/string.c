@@ -467,11 +467,10 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
 {
     int char1, char2;
     int i = 0;
-    char* cstr1 = my_str_get_cstr(str1);
-    char* cstr2 = my_str_getcstr(str2);
+    
     do{
-        char1 = cstr1[i];
-        char2 = cstr2[i];
+        char1 = my_str_getc(str1, i);
+        char2 = my_str_getc(str2, i);
         if (char1>char2){
             return 1;
         }
@@ -479,7 +478,7 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
             return -1;
         }
         i+=1;
-    }while((i < my_str_size(str1)));
+    }while((i <= my_str_size(str1)));
     return 0;
     
 }
@@ -492,9 +491,8 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
 {
     int char1, char2;
     int i = 0;
-    char* cstr1 = my_str_get_cstr(str1);
     do{
-        char1 = cstr1[i];
+        char1 = my_str_getc(str1, i);
         char2 = cstr2[i];
         if (char1>char2){
             return 1;
@@ -503,7 +501,7 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
             return -1;
         }
         i+=1;
-    }while((i < my_str_size(str1)));
+    }while((i <= my_str_size(str1)));
     return 0;
 }
 
@@ -612,7 +610,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
 {
     int c;
     do{
-        c = fgets(file);
+        c = fgetc(file);
         my_str_pushback(str, (char)c);
     }
     while (c != delimiter || c != EOF);
@@ -665,7 +663,7 @@ int my_str_create(my_str_t *str, size_t buf_size)
 }
 
 int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
-    cstr_len = my_str_cstr_len(cstr);
+    size_t cstr_len = my_str_cstr_len(cstr);
     if (buf_size == 0) {
         buf_size = cstr_len;
     }
