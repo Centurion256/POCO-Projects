@@ -64,7 +64,7 @@ int my_str_getc(const my_str_t *str, size_t index)
     if (my_str_empty(str) == 1)
         return -1;
 
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -79,7 +79,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 {
     if (my_str_empty(str))
         return -1;
-    if (index > str->size_m)
+    if (index > my_str_size(str))
         return -1;
     else
     {
@@ -120,7 +120,6 @@ int my_str_pushback(my_str_t *str, char c){
     return -2;
     }
     str->data[str->size_m] = c;
-    str->size_m += 1;
     return 0;
 }
 
@@ -188,11 +187,10 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
     if(pos<0 || pos>my_str_size(str)){
         return -1;
     }
-    if(my_str_size(str)==my_str_capacity(str)){
-        if(my_str_reserve(str, 2*my_str_capacity(str))){
-            return -2;
-        }
+    if(my_str_resize(str, my_str_size(str)+1, '\0')){
+        return -2;
     }
+    
     memmove(str->data+sizeof(char)*(pos+1), str->data+sizeof(char)*pos, sizeof(char)*1);
     memset(str->data+sizeof(char)*pos, c, sizeof(char)*1);
     str->size_m+=1;
@@ -360,9 +358,12 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         free(new_buffer);
         return -2;
     }
-    memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+
+    if(str->data){
+        memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+        free(str->data);
+    }
     memset(new_buffer+buf_size, '\0', sizeof(char)*1);
-    free(str->data);
     str->data = new_buffer;
     str->capacity_m = buf_size;
     return 0;
@@ -588,7 +589,7 @@ int my_str_write_file(const my_str_t *str, FILE *file)
 
 //! Записати стрічку на консоль:
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-int my_str_write(const my_str_t *str, FILE *file)
+int my_str_write(const my_str_t *str)
 {
     char *ptr = str->data;
     size_t length = 0;
@@ -608,17 +609,41 @@ int my_str_write(const my_str_t *str, FILE *file)
 int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
 {
     int c;
-    while ((c = fgetc(file)) != delimiter){ 
+    do{
+        c = fgetc(file);
         my_str_pushback(str, (char)c);
+    }
+    while (c != delimiter || c != EOF);
+    if (c == EOF){
+        return 1;
     }
     return 0;
 }
 
+//! Читає файл доки передана функція не поверне true, за потреби
+//! збільшує стрічку.
+//! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
+int my_str_read_file_delim_if(my_str_t *str, FILE *file, int (*predicat)(int))
+{
+    my_str_clear(str);
+    int c;
+    c = fgetc(file);
+    while(!( (*predicat)(c) || c==EOF)){
+        my_str_pushback(str, (char)c);
+        c = fgetc(file);
+    }
+    if(c==EOF){
+        return 1;
+    }
+    return 0;
+}
+
+
 /* Return codes reference:
-     0 - the program finished successfully.
-     1 - buffer size_m too small.
-     -2 - couldn't allocate enough memory/not enough memory.
-    -1 - a diffrerent error occured.
+     0 - Success.
+     1 - End of file.
+     -2 - Couldn't allocate enough memory/not enough memory.
+    -1 - Invalid arguments.
  */
 
 void my_str_free(my_str_t *str)
@@ -628,17 +653,27 @@ void my_str_free(my_str_t *str)
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
 {
-    //set the capacity_m and size_m
     str->size_m = 0;
-    str->capacity_m = buf_size;
-    //attempt to allocate enough memory for data
-    str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
-    //if there isn't enough memory, malloc() returns 0
-    if (!str->data)
-    {
-        my_str_free(str);
+    str->capacity_m = 0;
+    str->data = NULL;
+    if(my_str_reserve(str, buf_size)){
         return -2;
     }
+    return 0;
+}
+
+int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
+    size_t cstr_len = my_str_cstr_len(cstr);
+    if (buf_size == 0) {
+        buf_size = cstr_len;
+    }
+    if (buf_size < cstr_len){
+        return -1;
+    }
+    if (my_str_reserve(str, buf_size) != 0) {
+        return -2;
+    }
+    memmove(str->data, cstr, buf_size*sizeof(char));
     return 0;
 }
 
