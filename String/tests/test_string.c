@@ -106,20 +106,6 @@ START_TEST(string_test_reserve_giant_buffer)
 }
 END_TEST
 
-START_TEST(string_test_size)
-{
-    ck_assert_int_eq(my_str_size(&string), 0);
-}
-END_TEST
-
-START_TEST(string_test_size_10)
-{
-    my_str_resize(&string, 10, 0);
-    ck_assert_int_eq(my_str_size(&string), 0);
-
-}
-END_TEST
-
 Suite* string_actions_suite(void)
 {
     Suite* suit;
@@ -149,6 +135,33 @@ Suite* string_actions_suite(void)
     suite_add_tcase(suit, tc_reserve);
     return suit;
 }
+START_TEST(string_test_size)
+{
+    ck_assert_int_eq(my_str_size(&string), 0);
+}
+END_TEST
+
+START_TEST(string_test_size_10)
+{
+    my_str_resize(&string, 10, 0);
+    ck_assert_int_eq(my_str_size(&string), 10);
+
+}
+END_TEST
+
+START_TEST(string_test_capacity)
+{
+    my_str_resize(&string, 10, 0);
+    ck_assert_int_eq(my_str_capacity(&string), 16);
+}
+END_TEST
+
+START_TEST(string_test_empty)
+{
+    my_str_resize(&string, 0, 0);
+    ck_assert_int_eq(my_str_size(&string), 0);
+}
+END_TEST
 
 Suite* string_test_info_suite(void)
 {
@@ -163,6 +176,18 @@ Suite* string_test_info_suite(void)
     tcase_add_checked_fixture(tc_size, setup, teardown);
     tcase_add_test(tc_size, string_test_size);
     tcase_add_test(tc_size, string_test_size_10);
+    suite_add_tcase(suit, tc_size);
+
+    tc_capacity = tcase_create("Capacity test");
+    tcase_add_checked_fixture(tc_capacity, setup, teardown);
+    tcase_add_test(tc_capacity, string_test_capacity);
+    suite_add_tcase(suit, tc_capacity);
+
+    tc_empty = tcase_create("Empty string test");
+    tcase_add_checked_fixture(tc_empty, setup, teardown);
+    tcase_add_test(tc_empty, string_test_empty);
+    suite_add_tcase(suit, tc_empty);
+    
     return suit;    
 }
 
@@ -220,7 +245,7 @@ START_TEST(string_test_cmp_same_size_diff_chars)
 
 START_TEST(string_test_cmp_empty_cstr)
 {
-    ck_assert_int_eq(my_str_cmp( &string, my_str_get_cstr(&string2)), 0);
+    ck_assert_int_eq(my_str_cmp_cstr( &string, my_str_get_cstr(&string2)), 0);
 
 }END_TEST
 
@@ -228,7 +253,7 @@ START_TEST(string_test_cmp_same_cstr)
 {
     my_str_resize(&string, 10, 'a');
     my_str_resize(&string2, 10, 'a');
-    ck_assert_int_eq(signum(my_str_cmp(&string, my_str_get_cstr(&string2)), 
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2))), 
                      signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
@@ -239,7 +264,7 @@ START_TEST(string_test_cmp_diff_size_same_chars_cstr)
     my_str_resize(&string, 10, 'a');
     my_str_resize(&string2, 12, 'a');
 
-    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2)), 
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2))), 
                      signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST
@@ -260,7 +285,7 @@ START_TEST(string_test_cmp_same_size_diff_chars_cstr)
     my_str_resize(&string, 10, 'a');
     my_str_resize(&string2, 10, 'a');
     my_str_putc(&string2, 2, 'b');
-    ck_assert_int_eq(signum(my_str_cmp(&string, my_str_get_cstr(&string2)), 
+    ck_assert_int_eq(signum(my_str_cmp_cstr(&string, my_str_get_cstr(&string2))), 
                      signum(strcmp(my_str_get_cstr(&string), my_str_get_cstr(&string2)))
                     );
 }END_TEST

@@ -358,9 +358,12 @@ int my_str_reserve(my_str_t *str, size_t buf_size)
         free(new_buffer);
         return -2;
     }
-    memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+
+    if(str->data){
+        memcpy(new_buffer, str->data, sizeof(char)*str->size_m);
+        free(str->data);
+    }
     memset(new_buffer+buf_size, '\0', sizeof(char)*1);
-    free(str->data);
     str->data = new_buffer;
     str->capacity_m = buf_size;
     return 0;
@@ -464,11 +467,10 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
 {
     int char1, char2;
     int i = 0;
-    char* cstr1 = my_str_get_cstr(str1);
-    char* cstr2 = my_str_getcstr(str2);
+    
     do{
-        char1 = cstr1[i];
-        char2 = cstr2[i];
+        char1 = my_str_getc(str1, i);
+        char2 = my_str_getc(str2, i);
         if (char1>char2){
             return 1;
         }
@@ -476,7 +478,7 @@ int my_str_cmp(const my_str_t *str1, const my_str_t *str2)
             return -1;
         }
         i+=1;
-    }while((i < my_str_size(str1)));
+    }while((i <= my_str_size(str1)));
     return 0;
     
 }
@@ -489,9 +491,8 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
 {
     int char1, char2;
     int i = 0;
-    char* cstr1 = my_str_get_cstr(str1);
     do{
-        char1 = cstr1[i];
+        char1 = my_str_getc(str1, i);
         char2 = cstr2[i];
         if (char1>char2){
             return 1;
@@ -500,7 +501,7 @@ int my_str_cmp_cstr(const my_str_t *str1, const char *cstr2)
             return -1;
         }
         i+=1;
-    }while((i < my_str_size(str1)));
+    }while((i <= my_str_size(str1)));
     return 0;
 }
 
@@ -609,7 +610,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
 {
     int c;
     do{
-        c = fgets(file);
+        c = fgetc(file);
         my_str_pushback(str, (char)c);
     }
     while (c != delimiter || c != EOF);
@@ -652,22 +653,17 @@ void my_str_free(my_str_t *str)
 //Constructor for my_str_t
 int my_str_create(my_str_t *str, size_t buf_size)
 {
-    //set the capacity_m and size_m
     str->size_m = 0;
-    str->capacity_m = buf_size;
-    //attempt to allocate enough memory for data
-    str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
-    //if there isn't enough memory, malloc() returns 0
-    if (!str->data)
-    {
-        my_str_free(str);
+    str->capacity_m = 0;
+    str->data = NULL;
+    if(my_str_reserve(str, buf_size)){
         return -2;
     }
     return 0;
 }
 
 int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
-    cstr_len = my_str_cstr_len(cstr);
+    size_t cstr_len = my_str_cstr_len(cstr);
     if (buf_size == 0) {
         buf_size = cstr_len;
     }

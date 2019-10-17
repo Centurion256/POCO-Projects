@@ -20,13 +20,12 @@ int main(int argc, char *argv[])
         number_of_words += 1;
         size_t i;
         for (i = 0; i < my_str_size(word); i++){
-            if isalpha(my_str_getc(i)){
+            if(isalpha(my_str_getc(i))){
                 words_len += 1;
             }
         }
-    }
-    while (c != 1);
+    }while (c != 1);
+    
     printf("%.5f\n", (double)words_len/(double)number_of_words);
-    }
     return 0;
 }
