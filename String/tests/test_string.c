@@ -11,7 +11,6 @@ my_str_t string2;
 void setup(void)
 {
     my_str_create(&string, 0);
-
 }
 
 void teardown(void)
@@ -114,22 +113,24 @@ Suite* string_actions_suite(void)
     TCase* tc_reserve;
 
     suit = suite_create("Memory opertaions, copy, etc.");
-
+    
     tc_resize = tcase_create("Resize tests");
     tcase_add_checked_fixture(tc_resize, setup, teardown);
     tcase_add_test(tc_resize, string_test_resize);
     tcase_add_test(tc_resize, string_test_resize_negative);
 
+    
     tc_shrink = tcase_create("Shrink tests");
     tcase_add_checked_fixture(tc_shrink, setup, teardown);
     tcase_add_test(tc_shrink, string_test_shrink);
-
+   
+    
     tc_reserve = tcase_create("Reserve tests");
     tcase_add_checked_fixture(tc_reserve, setup, teardown);
     tcase_add_test(tc_reserve, string_test_reserve_small_buffer);
     tcase_add_test(tc_reserve, string_test_reserve_normal_buffer);
     tcase_add_test(tc_reserve, string_test_reserve_giant_buffer);
-
+   
     suite_add_tcase(suit, tc_resize);
     suite_add_tcase(suit, tc_shrink);
     suite_add_tcase(suit, tc_reserve);
@@ -245,7 +246,7 @@ START_TEST(string_test_cmp_same_size_diff_chars)
 
 START_TEST(string_test_cmp_empty_cstr)
 {
-    ck_assert_int_eq(my_str_cmp_cstr( &string, my_str_get_cstr(&string2)), 0);
+    ck_assert_int_eq(my_str_cmp_cstr(&string, my_str_get_cstr(&string2)), 0);
 
 }END_TEST
 
@@ -325,8 +326,8 @@ int main(void)
     int failures = 0;
     SRunner *run;
 
-    run = srunner_create(string_actions_suite());
-    srunner_add_suite(run, string_test_info_suite());
+    run = srunner_create(string_test_info_suite());
+    srunner_add_suite(run, string_actions_suite());
     srunner_add_suite(run, string_cmps_suite());
     srunner_set_fork_status(run, CK_NOFORK);
     srunner_run_all(run, CK_NORMAL);

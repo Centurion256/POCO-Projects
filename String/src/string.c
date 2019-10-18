@@ -61,9 +61,6 @@ int my_str_empty(const my_str_t * str)
 //! Тому, власне, int а не char
 int my_str_getc(const my_str_t *str, size_t index)
 {
-    if (my_str_empty(str) == 1)
-        return -1;
-
     if (index > my_str_size(str))
         return -1;
     else
@@ -119,7 +116,7 @@ int my_str_pushback(my_str_t *str, char c){
     if(my_str_resize(str, my_str_size(str)+1, 0)){
     return -2;
     }
-    str->data[str->size_m] = c;
+    str->data[str->size_m-1] = c;
     return 0;
 }
 
@@ -613,7 +610,7 @@ int my_str_read_file_delim(my_str_t *str, FILE *file, int delimiter)
         c = fgetc(file);
         my_str_pushback(str, (char)c);
     }
-    while (c != delimiter || c != EOF);
+    while (c != delimiter && c != EOF);
     if (c == EOF){
         return 1;
     }
@@ -654,12 +651,16 @@ void my_str_free(my_str_t *str)
 int my_str_create(my_str_t *str, size_t buf_size)
 {
     str->size_m = 0;
-    str->capacity_m = 0;
-    str->data = NULL;
-    if(my_str_reserve(str, buf_size)){
+    str->capacity_m = buf_size;
+    str->data = (char *)malloc(sizeof(char) * (buf_size + 1));
+    if (!str->data)
+    {
+        my_str_free(str);
         return -2;
     }
+    memset(str->data, '\0', 1*sizeof(char));
     return 0;
+
 }
 
 int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){

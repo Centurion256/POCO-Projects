@@ -11,5 +11,17 @@ add_library(my_str_t SHARED ${SOURCES})
 #For testing purposes only!
 enable_testing()
 
-add_subdirectory(tests)
+add_executable(example_exe ${CMAKE_SOURCE_DIR}/example/str_usage_p1.c)
+
+target_link_libraries(example_exe my_str_t)
+#add_subdirectory(tests)
+
+#add_custom_target(example
+    
+#    DEPENDS my_str_t
+#    SOURCES ${CMAKE_SOURCE_DIR}/example/str_usage_p1.c)
+
+#target_sources(example ${CMAKE_CURRENT_SOURCE_DIR}/example/str_usage_p1.c)
+
+#target_link_libraries(example my_str_t)
 #add_executable(str_test ${SOURCES})

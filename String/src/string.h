@@ -246,4 +246,6 @@ int my_str_write(const my_str_t* str);
 //! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
 int my_str_read_file_delim(my_str_t* str, FILE* file, int delimiter);
 
+int my_str_read_file_delim_if(my_str_t *str, FILE *file, int (*predicat)(int));
+
 #endif //POCO_PROJECTS_STRING_H
