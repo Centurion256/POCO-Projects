@@ -551,6 +551,19 @@ START_TEST(string_test_clear_empty){
     ck_assert_int_eq(my_str_size(&string), 0);
 }END_TEST
 
+START_TEST(string_test_insert_c)
+{
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_c(&string, 'b', 1), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "abaaaa");
+}END_TEST
+
+START_TEST(string_test_insert_c_empty)
+{
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_c(&string, '', 1), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
 
 START_TEST(string_test_insert_cstr){
     my_str_resize(&string, 5, 'a');
@@ -615,9 +628,10 @@ Suite* string_modification_suite(void)
     tcase_add_test(tc_clear, string_test_clear);
     tcase_add_test(tc_clear, string_test_clear_empty);
 
-    //tc_insert_c = tcase_create("String insert character test");
-    //tcase_add_checked_fixture(tc_clear, setup, teardown);
-    //tcase_add_test(tc_clear, string_test_clear);
+    tc_insert_c = tcase_create("String insert character test");
+    tcase_add_checked_fixture(tc_insert_c, setup, teardown);
+    tcase_add_test(tc_insert_c, string_test_insert_c);
+    tcase_add_test(tc_insert_c, string_test_insert_c_empty);
 
     tc_insert_cstr = tcase_create("Insert cstring test");
 
@@ -635,6 +649,7 @@ Suite* string_modification_suite(void)
     suite_add_tcase(suit, tc_popback);
     suite_add_tcase(suit, tc_copy);
     suite_add_tcase(suit, tc_clear);
+    suite_add_tcase(suit, tc_insert_c);
     suite_add_tcase(suit, tc_insert_cstr);
 
     return suit;

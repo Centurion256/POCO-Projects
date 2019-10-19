@@ -192,8 +192,8 @@ int my_str_insert_c(my_str_t *str, char c, size_t pos)
         return -2;
     }
     
-    memmove(str->data+sizeof(char)*(pos+1), str->data+sizeof(char)*pos, sizeof(char)*1);
-    memset(str->data+sizeof(char)*pos, c, sizeof(char)*1);
+    memcpy(str->data+sizeof(char)*(pos+1), str->data+(sizeof(char)*pos), sizeof(char)*(my_str_size(str)-(pos+1)));
+    memcpy(str->data+sizeof(char)*pos, &c, sizeof(char)*1);
     str->size_m+=1;
     return 0;
 }
@@ -212,8 +212,9 @@ int my_str_insert(my_str_t *str, const my_str_t *from, size_t pos)
     if(my_str_resize(str, my_str_size(str) + my_str_size(from),0)){
         return -2;
     }
-    memmove(str->data+sizeof(char)*(pos+my_str_size(from)), str->data+sizeof(char)*pos, sizeof(char)*my_str_size(from));
-    memcpy(str->data+sizeof(char)*pos, from->data, sizeof(char)*my_str_size(from));
+    size_t csize = my_str_size(from);
+    memmove(str->data+sizeof(char)*(pos+csize), str->data+sizeof(char)*pos, sizeof(char)*(my_str_size(str)-(pos+csize)));
+    memcpy(str->data+sizeof(char)*pos, from->data, sizeof(char)*csize);
     return 0;
 }
 
