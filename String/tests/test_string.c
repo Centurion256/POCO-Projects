@@ -493,6 +493,152 @@ Suite* string_constructors_suite(void){
 
     return suit;
 }
+START_TEST(string_test_pushback){
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_pushback(&string, 'b'), 0);
+    ck_assert_int_eq(my_str_getc(&string, 5), 'b');
+    ck_assert_int_eq(my_str_size(&string), 6);
+    
+}END_TEST
+
+START_TEST(string_test_pushback_empty){
+    ck_assert_int_eq(my_str_pushback(&string, 'b'), 0);
+    ck_assert_int_eq(my_str_getc(&string, 0), 'b');
+    ck_assert_int_eq(my_str_size(&string), 1);
+}END_TEST
+
+
+START_TEST(string_test_popback)
+{
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_popback(&string), 'a');
+    ck_assert_int_eq(my_str_size(&string), 4);
+    
+}END_TEST
+
+START_TEST(string_test_popback_one_element)
+{
+    my_str_resize(&string, 1, 'a');
+    ck_assert_int_eq(my_str_popback(&string), 'a');
+    ck_assert_int_eq(my_str_size(&string), 0);
+    
+}END_TEST
+
+START_TEST(string_test_popback_empty)
+{
+    
+    ck_assert_int_eq(my_str_popback(&string), -2);
+    ck_assert_int_eq(my_str_size(&string), 0);
+    
+}END_TEST
+
+
+START_TEST(string_test_copy){
+    my_str_from_cstr(&string, "abcde", 0);
+    ck_assert_int_eq(my_str_copy(&string, &string2, 0), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), my_str_get_cstr(&string2));
+}END_TEST
+
+
+START_TEST(string_test_clear){
+    my_str_resize(&string, 5, 'a');
+    my_str_clear(&string);
+    ck_assert_int_eq(my_str_size(&string), 0);
+}END_TEST
+
+START_TEST(string_test_clear_empty){
+    my_str_clear(&string);
+    ck_assert_int_eq(my_str_size(&string), 0);
+}END_TEST
+
+
+START_TEST(string_test_insert_cstr){
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_cstr(&string, "bb", 2), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aabbaaa");
+}END_TEST
+START_TEST(string_test_insert_empty_cstr){
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_cstr(&string, "", 2), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+START_TEST(string_test_insert_cstr_empty){
+    ck_assert_int_eq(my_str_insert_cstr(&string, "bb", 0), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "bb");
+}END_TEST
+START_TEST(string_test_insert_cstr_out_of_bounds){
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_cstr(&string, "bb", 10), -1);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+
+Suite* string_modification_suite(void)
+{
+    Suite* suit;
+    TCase* tc_pushback;
+    TCase* tc_popback;
+    TCase* tc_copy;
+    TCase* tc_clear;
+    TCase* tc_insert_c;
+    TCase* tc_insert;
+    TCase* tc_insert_cstr;
+    TCase* tc_append;
+    TCase* tc_append_cstr;
+    TCase* tc_substr;
+    TCase* tc_substr_cstr;
+
+    suit = suite_create("Modification suite");
+       
+    tc_pushback = tcase_create("Pushback test");
+    tcase_add_checked_fixture(tc_pushback, setup, teardown);
+    tcase_add_test(tc_pushback, string_test_pushback);
+    tcase_add_test(tc_pushback, string_test_pushback_empty);
+
+
+    tc_popback = tcase_create("Create test");
+    tcase_add_checked_fixture(tc_popback, setup, teardown);
+    tcase_add_test(tc_popback, string_test_popback);
+    tcase_add_test(tc_popback, string_test_popback_one_element);
+    tcase_add_test(tc_popback, string_test_popback_empty);
+
+    tc_copy = tcase_create("Copy case");
+    tcase_add_checked_fixture(tc_copy, setup2, teardown2);
+    tcase_add_test(tc_copy, string_test_copy);
+
+    //tcase_add_test(tc_copy, string_test_copy_empty);
+    //tcase_add_test(tc_copy, string_test_copy_to_empty);
+    //tcase_add_test(tc_copy, string_test_copy_with_exect_size);
+    //tcase_add_test(tc_copy, string_test_copy_without_enough_space);
+
+    tc_clear = tcase_create("String clear test");
+    tcase_add_checked_fixture(tc_clear, setup, teardown);
+    tcase_add_test(tc_clear, string_test_clear);
+    tcase_add_test(tc_clear, string_test_clear_empty);
+
+    //tc_insert_c = tcase_create("String insert character test");
+    //tcase_add_checked_fixture(tc_clear, setup, teardown);
+    //tcase_add_test(tc_clear, string_test_clear);
+
+    tc_insert_cstr = tcase_create("Insert cstring test");
+
+    //free(): double free detected in tcache 2
+
+    // tcase_add_checked_fixture(tc_clear, setup, teardown);
+    // tcase_add_test(tc_clear, string_test_insert_cstr);
+    // tcase_add_test(tc_clear, string_test_insert_empty_cstr);
+    // tcase_add_test(tc_clear, string_test_insert_cstr_empty);
+    // tcase_add_test(tc_clear, string_test_insert_cstr_out_of_bounds);
+
+
+
+    suite_add_tcase(suit, tc_pushback);
+    suite_add_tcase(suit, tc_popback);
+    suite_add_tcase(suit, tc_copy);
+    suite_add_tcase(suit, tc_clear);
+    suite_add_tcase(suit, tc_insert_cstr);
+
+    return suit;
+}
 
 int main(void)
 {
@@ -504,6 +650,7 @@ int main(void)
     srunner_add_suite(run, string_cmps_suite());
     srunner_add_suite(run, string_getset_suite());
     srunner_add_suite(run, string_constructors_suite());
+    srunner_add_suite(run, string_modification_suite());
     srunner_set_fork_status(run, CK_NOFORK);
     srunner_run_all(run, CK_NORMAL);
     failures = srunner_ntests_failed(run);

@@ -161,6 +161,8 @@ int my_str_copy(const my_str_t *from, my_str_t *to, int reserve)
     }
     if(my_str_reserve(to, new_size)){
       return -2;}
+    if(my_str_resize(to, my_str_size(from), '\0')){
+      return -2;}
     memcpy(to->data, from->data, sizeof(char)*from->size_m);
     return 0;
 }
@@ -234,24 +236,6 @@ int my_str_insert_cstr(my_str_t *str, const char *from, size_t pos)
     memcpy(str->data+sizeof(char)*pos, from, sizeof(char)*csize);
 }
 
-//! Додати символ в кінець.
-//! За потреби -- збільшує буфер.
-//! У випадку помилки повертає різні від'ємні числа, якщо все ОК -- 0.
-// int my_str_append_c(my_str_t *str, char c)
-// {
-//     if(!str){
-//         return -1;
-//     }
-//     int err_code = my_str_reserve(str, my_str_size(str)+1);
-//     if(err_code){
-//         return -2;
-//     }
-//     str->size_m += 1;
-//     str->data[str->size_m-1] = c;
-//     return 0;
-// }
-
-//! Вже є my_str_pushback
 
 //! Додати стрічку в кінець.
 //! За потреби -- збільшує буфер.
