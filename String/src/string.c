@@ -38,9 +38,10 @@ size_t my_str_capacity(const my_str_t *str)
 
 size_t my_str_cstr_len(const char* cstr){
     size_t res = 0;
-    do{
+    while(cstr[res] != '\0')
+    {
         res +=1;
-    }while(cstr[res] != '\0');
+    }
     return res;
 
 }
@@ -229,11 +230,16 @@ int my_str_insert_cstr(my_str_t *str, const char *from, size_t pos)
     }
 
     size_t csize = my_str_cstr_len(from);
+    printf("%zu\n", csize);
     if(my_str_resize(str, my_str_size(str)+csize, 0)){
         return -2;
     }
-    memmove(str->data+sizeof(char)*(pos+csize), str->data+sizeof(char)*pos, sizeof(char)*csize);
-    memcpy(str->data+sizeof(char)*pos, from, sizeof(char)*csize);
+    if (csize >= 1)
+    {
+        memcpy(str->data+sizeof(char)*(pos+csize), str->data+(sizeof(char)*pos), sizeof(char)*(my_str_size(str)-(pos+csize)));
+        memcpy(str->data+sizeof(char)*pos, from, sizeof(char)*csize);
+    }
+    return 0;
 }
 
 

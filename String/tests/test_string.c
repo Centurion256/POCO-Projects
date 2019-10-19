@@ -621,13 +621,13 @@ Suite* string_modification_suite(void)
 
     tc_insert_cstr = tcase_create("Insert cstring test");
 
-    //free(): double free detected in tcache 2
+    //free(): double free detected in tcache 2 FIXED
 
-    // tcase_add_checked_fixture(tc_clear, setup, teardown);
-    // tcase_add_test(tc_clear, string_test_insert_cstr);
-    // tcase_add_test(tc_clear, string_test_insert_empty_cstr);
-    // tcase_add_test(tc_clear, string_test_insert_cstr_empty);
-    // tcase_add_test(tc_clear, string_test_insert_cstr_out_of_bounds);
+    tcase_add_checked_fixture(tc_insert_cstr, setup, teardown);
+    tcase_add_test(tc_insert_cstr, string_test_insert_cstr);
+    tcase_add_test(tc_insert_cstr, string_test_insert_empty_cstr);
+    tcase_add_test(tc_insert_cstr, string_test_insert_cstr_empty);
+    tcase_add_test(tc_insert_cstr, string_test_insert_cstr_out_of_bounds);
 
 
 
