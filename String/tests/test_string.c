@@ -28,6 +28,11 @@ void teardown2(void){
     my_str_free(&string2);
 }
 
+int signum(int x)
+{
+    return (x > 0) - (x < 0);
+}
+
 START_TEST(string_test_resize)
 {
     char rem = 'R';
@@ -136,6 +141,10 @@ Suite* string_actions_suite(void)
     suite_add_tcase(suit, tc_reserve);
     return suit;
 }
+
+
+
+
 START_TEST(string_test_size)
 {
     ck_assert_int_eq(my_str_size(&string), 0);
@@ -192,10 +201,10 @@ Suite* string_test_info_suite(void)
     return suit;    
 }
 
-int signum(int x)
-{
-    return (x > 0) - (x < 0);
-}
+
+
+
+
 
 START_TEST(string_test_cmp_empty)
 {
@@ -297,7 +306,7 @@ Suite* string_cmps_suite(void){
     TCase* tc_cmp;
     TCase* tc_cmp_cstr;
 
-    suit = suite_create("Stirng comparisons");
+    suit = suite_create("String comparisons");
 
     tc_cmp = tcase_create("Compare tests");
     tcase_add_checked_fixture(tc_cmp, setup2, teardown2);
@@ -321,6 +330,51 @@ Suite* string_cmps_suite(void){
     return suit;
 }
 
+
+
+START_TEST(string_test_getc){
+    my_str_from_cstr(&string, "abcde");
+    ck_assert_int_eq(my_str_getc(&string, 2), 'c');
+}END_TEST
+
+START_TEST(string_test_getc_empty){
+    ck_assert_int_eq(my_str_getc(&string, 1), -1);
+
+}END_TEST
+
+START_TEST(string_test_getc_last){
+    my_str_from_cstr(&string, "abcde");
+    ck_assert_int_eq(my_str_getc(&string, 5), '\0');
+}END_TEST
+
+START_TEST(string_test_getc_empty_last){
+    ck_assert_int_eq(my_str_getc(&string, 0), '\0');
+
+}END_TEST
+
+START_TEST(string_test_getc_out_of_bounds){
+    my_str_from_cstr(&string, "abcde");
+    ck_assert_int_eq(my_str_getc(&string, 8), -1);
+
+
+}
+Suite* string_getset_suite(void){
+    Suite* suit;
+    TCase* tc_getc;
+    TCase* tc_setc;
+    TCase* tc_get_cstr;
+    suit = suite_create("Getters and setters tests");
+    tcase_add_checked_fixture(tc_getc, setup, teardown);
+    tcase_add_test(tc_cmp, string_test_getc);
+    tcase_add_test(tc_cmp, string_test_getc_empty);
+    tcase_add_test(tc_cmp, string_test_getc_last);
+    tcase_add_test(tc_cmp, string_test_getc_empty_last);
+    tcase_add_test(tc_cmp, string_test_getc_out_of_bounds);
+
+
+}
+
+Suite
 int main(void)
 {
     int failures = 0;
