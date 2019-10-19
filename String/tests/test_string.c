@@ -585,6 +585,29 @@ START_TEST(string_test_insert_cstr_out_of_bounds){
     ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
 }END_TEST
 
+
+
+START_TEST(string_test_append){
+    my_str_resize(&string, 5, 'a');
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_append(&string, &string2), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaabbbb");
+}END_TEST
+START_TEST(string_test_append_empty){
+    my_str_resize(&string, 5, 'a');
+    my_str_resize(&string2, 0, 'b');
+    ck_assert_int_eq(my_str_append(&string, &string2), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+START_TEST(string_test_append){
+    my_str_resize(&string, 0, 'a');
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_append(&string, &string2), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "bbbb");
+}END_TEST
+
+
+
 Suite* string_modification_suite(void)
 {
     Suite* suit;
@@ -645,12 +668,21 @@ Suite* string_modification_suite(void)
 
 
 
+
+    tc_append = tcase_create("String append test");
+    tcase_add_checked_fixture(tc_append, setup, teardown);
+    tcase_add_test(tc_append, string_test_append);
+    tcase_add_test(tc_append, string_test_append_empty);
+    tcase_add_test(tc_append, string_test_append_to_empty);
+
+
     suite_add_tcase(suit, tc_pushback);
     suite_add_tcase(suit, tc_popback);
     suite_add_tcase(suit, tc_copy);
     suite_add_tcase(suit, tc_clear);
     suite_add_tcase(suit, tc_insert_c);
     suite_add_tcase(suit, tc_insert_cstr);
+    suite_add_tcase(suit, tc_append);
 
     return suit;
 }
