@@ -40,8 +40,8 @@ size_t my_str_cstr_len(const char* cstr){
     size_t res = 0;
     do{
         res +=1;
-    }while(cstr[res] != '\n');
-    return res-1;
+    }while(cstr[res] != '\0');
+    return res;
 
 }
 
@@ -76,7 +76,8 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 {
     if (my_str_empty(str))
         return -1;
-    if (index > my_str_size(str))
+    if (index >= my_str_size(str))
+        //we can't change null terminator
         return -1;
     else
     {
@@ -674,7 +675,10 @@ int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
     if (my_str_reserve(str, buf_size) != 0) {
         return -2;
     }
-    memmove(str->data, cstr, buf_size*sizeof(char));
+    if (my_str_resize(str, cstr_len, '\0') != 0) {
+        return -2;
+    }
+    memmove(str->data, cstr, cstr_len*sizeof(char));
     return 0;
 }
 

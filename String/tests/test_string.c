@@ -144,7 +144,6 @@ Suite* string_actions_suite(void)
 
 
 
-
 START_TEST(string_test_size)
 {
     ck_assert_int_eq(my_str_size(&string), 0);
@@ -333,7 +332,7 @@ Suite* string_cmps_suite(void){
 
 
 START_TEST(string_test_getc){
-    my_str_from_cstr(&string, "abcde");
+    my_str_from_cstr(&string, "abcde", 0);
     ck_assert_int_eq(my_str_getc(&string, 2), 'c');
 }END_TEST
 
@@ -343,7 +342,7 @@ START_TEST(string_test_getc_empty){
 }END_TEST
 
 START_TEST(string_test_getc_last){
-    my_str_from_cstr(&string, "abcde");
+    my_str_from_cstr(&string, "abcde", 0);
     ck_assert_int_eq(my_str_getc(&string, 5), '\0');
 }END_TEST
 
@@ -353,28 +352,148 @@ START_TEST(string_test_getc_empty_last){
 }END_TEST
 
 START_TEST(string_test_getc_out_of_bounds){
-    my_str_from_cstr(&string, "abcde");
-    ck_assert_int_eq(my_str_getc(&string, 8), -1);
-
-
+    //my_str_resize(&string, 5, 'a');
+    my_str_from_cstr(&string, "aaaaa ", 0);
+    ck_assert_msg(my_str_getc(&string, 100)==-1, "String size is %zu", my_str_size(&string));
 }
+END_TEST
+
+
+START_TEST(string_test_setc){
+    my_str_from_cstr(&string, "abcde", 0);
+    ck_assert_int_eq(my_str_putc(&string, 2, 'H'), 0);
+    ck_assert_int_eq(my_str_getc(&string, 2), 'H');
+}END_TEST
+
+START_TEST(string_test_setc_empty){
+    ck_assert_int_eq(my_str_putc(&string, 2, 'H'), -1);
+}END_TEST
+
+START_TEST(string_test_setc_last){
+    my_str_from_cstr(&string, "aa", 0);
+    ck_assert_int_eq(my_str_putc(&string, 2, 'H'), -1);
+    ck_assert_int_eq(my_str_getc(&string, 2), '\0');
+}END_TEST
+
+START_TEST(string_test_setc_out_of_bounds){
+    my_str_from_cstr(&string, "abcde", 0);
+    ck_assert_int_eq(my_str_putc(&string, 10, 'H'), -1);
+}
+END_TEST
+
+START_TEST(string_test_get_cstr){
+    
+    my_str_resize(&string, 5, 'a');
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+
+START_TEST(string_test_get_cstr_empty){
+    
+    ck_assert_str_eq(my_str_get_cstr(&string), "");
+    
+}END_TEST
+
+START_TEST(string_test_get_cstr_with_empty_space){
+    my_str_resize(&string, 10, 'a');
+    my_str_resize(&string, 5, ' ');
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+
 Suite* string_getset_suite(void){
     Suite* suit;
     TCase* tc_getc;
     TCase* tc_setc;
     TCase* tc_get_cstr;
     suit = suite_create("Getters and setters tests");
-    tcase_add_checked_fixture(tc_getc, setup, teardown);
-    tcase_add_test(tc_cmp, string_test_getc);
-    tcase_add_test(tc_cmp, string_test_getc_empty);
-    tcase_add_test(tc_cmp, string_test_getc_last);
-    tcase_add_test(tc_cmp, string_test_getc_empty_last);
-    tcase_add_test(tc_cmp, string_test_getc_out_of_bounds);
 
+    tc_getc = tcase_create("Get char tests");
+    tcase_add_checked_fixture(tc_getc, setup, teardown);
+    tcase_add_test(tc_getc, string_test_getc);
+    tcase_add_test(tc_getc, string_test_getc_empty);
+    tcase_add_test(tc_getc, string_test_getc_last);
+    tcase_add_test(tc_getc, string_test_getc_empty_last);
+    tcase_add_test(tc_getc, string_test_getc_out_of_bounds);
+
+    tc_setc = tcase_create("Put char tests");
+    tcase_add_checked_fixture(tc_setc, setup, teardown);
+    tcase_add_test(tc_setc, string_test_setc);
+    tcase_add_test(tc_setc, string_test_setc_empty);
+    tcase_add_test(tc_setc, string_test_setc_last);
+    tcase_add_test(tc_setc, string_test_setc_out_of_bounds);
+
+    tc_get_cstr = tcase_create("Get cstring tests");
+    tcase_add_checked_fixture(tc_get_cstr, setup, teardown);
+    tcase_add_test(tc_get_cstr, string_test_setc);
+    tcase_add_test(tc_get_cstr, string_test_setc_empty);
+    tcase_add_test(tc_get_cstr, string_test_get_cstr_with_empty_space);
+
+    
+    suite_add_tcase(suit, tc_getc);
+    suite_add_tcase(suit, tc_setc);
+    suite_add_tcase(suit, tc_get_cstr);
+    return suit;
 
 }
 
-Suite
+
+
+START_TEST(string_test_create){
+    ck_assert_int_eq(my_str_create(&string, 10), 0);
+    ck_assert_int_eq(my_str_capacity(&string), 10);
+    ck_assert_int_eq(my_str_size(&string), 0);
+}END_TEST
+
+START_TEST(string_test_create_giant_buffer){
+    ck_assert_int_eq(my_str_create(&string, (size_t)1844674407370955161), -2);// 2**64/10
+}END_TEST
+
+
+START_TEST(string_test_from_cstr){
+    ck_assert_int_eq(my_str_from_cstr(&string, "abcd", 10), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "abcd" );
+}END_TEST
+
+START_TEST(string_test_from_cstr_empty){
+    ck_assert_int_eq(my_str_from_cstr(&string, "ab", 10), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "ab" );
+}END_TEST
+
+START_TEST(string_test_from_cstr_buf_too_small){
+    ck_assert_int_eq(my_str_from_cstr(&string, "abcdef", 3), -1);
+}END_TEST
+
+START_TEST(string_test_from_cstr_giant_buffer){
+    ck_assert_int_eq(my_str_from_cstr(&string, "ab", (size_t)1844674407370955161), -2);// 2**64/10
+}END_TEST
+
+START_TEST(string_test_from_cstr_buf_zero){
+    ck_assert_int_eq(my_str_from_cstr(&string, "ab", 0), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "ab" );
+}END_TEST
+
+Suite* string_constructors_suite(void){
+    Suite* suit;
+    TCase* tc_create;
+    TCase* tc_from_cstr;
+    suit = suite_create("Constructors tests");
+    tc_create = tcase_create("Test create");
+    tcase_add_test(tc_create, string_test_create);
+    tcase_add_test(tc_create, string_test_create_giant_buffer);
+    
+    tc_from_cstr = tcase_create("Test create from cstring");
+    tcase_add_checked_fixture(tc_from_cstr, setup, teardown);
+    tcase_add_test(tc_from_cstr, string_test_from_cstr);
+    tcase_add_test(tc_from_cstr, string_test_from_cstr_empty);
+    tcase_add_test(tc_from_cstr, string_test_from_cstr_buf_too_small);
+    tcase_add_test(tc_from_cstr, string_test_from_cstr_giant_buffer);
+    tcase_add_test(tc_from_cstr, string_test_from_cstr_buf_zero);
+
+    suite_add_tcase(suit, tc_create);
+    suite_add_tcase(suit, tc_from_cstr);
+
+    return suit;
+}
+
 int main(void)
 {
     int failures = 0;
@@ -383,6 +502,8 @@ int main(void)
     run = srunner_create(string_test_info_suite());
     srunner_add_suite(run, string_actions_suite());
     srunner_add_suite(run, string_cmps_suite());
+    srunner_add_suite(run, string_getset_suite());
+    srunner_add_suite(run, string_constructors_suite());
     srunner_set_fork_status(run, CK_NOFORK);
     srunner_run_all(run, CK_NORMAL);
     failures = srunner_ntests_failed(run);

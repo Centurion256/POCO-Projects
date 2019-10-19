@@ -14,7 +14,7 @@ enable_testing()
 add_executable(example_exe ${CMAKE_SOURCE_DIR}/example/str_usage_p1.c)
 
 target_link_libraries(example_exe my_str_t)
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
 #add_custom_target(example
     
