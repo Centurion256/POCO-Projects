@@ -209,12 +209,16 @@ int my_str_insert(my_str_t *str, const my_str_t *from, size_t pos)
     if(pos<0 || pos>my_str_size(str)){
         return -1;
     }
-    if(my_str_resize(str, my_str_size(str) + my_str_size(from),0)){
+    if(my_str_resize(str, my_str_size(str) + my_str_size(from),'d')){
         return -2;
     }
     size_t csize = my_str_size(from);
-    memmove(str->data+sizeof(char)*(pos+csize), str->data+sizeof(char)*pos, sizeof(char)*(my_str_size(str)-(pos+csize)));
-    memcpy(str->data+sizeof(char)*pos, from->data, sizeof(char)*csize);
+    // printf("%zu\n", csize);
+    if (csize >= 1)
+    {
+        memmove(str->data+sizeof(char)*(my_str_size(str)-csize), str->data+sizeof(char)*pos, sizeof(char)*(csize));
+        memcpy(str->data+sizeof(char)*pos, from->data, sizeof(char)*csize);
+    }
     return 0;
 }
 
@@ -231,7 +235,7 @@ int my_str_insert_cstr(my_str_t *str, const char *from, size_t pos)
     }
 
     size_t csize = my_str_cstr_len(from);
-    printf("%zu\n", csize);
+    
     if(my_str_resize(str, my_str_size(str)+csize, 0)){
         return -2;
     }
@@ -255,10 +259,11 @@ int my_str_append(my_str_t *str, const my_str_t *from)
     if(!from){
         return -1;
     }
-    if(my_str_resize(str, my_str_size(str)+my_str_size(from), 0)){
+    if(my_str_resize(str, my_str_size(str)+my_str_size(from), '\0')){
         return -2;
     }
-    memcpy(str->data+my_str_size(str), from->data, sizeof(char)*my_str_size(from));
+    memcpy(str->data + sizeof(char)*(my_str_size(str)-my_str_size(from)),
+                 from->data, sizeof(char)*my_str_size(from));
     return 0;
 }
 
@@ -584,7 +589,7 @@ int my_str_write(const my_str_t *str)
     size_t length = 0;
     while (*ptr != '\0' && length < str->size_m)
     {
-        printf("%c",*ptr);
+        //printf("%c",*ptr);
         ptr++;
         length++;
     }
