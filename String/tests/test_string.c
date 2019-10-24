@@ -72,9 +72,9 @@ END_TEST
 START_TEST(string_test_reserve_small_buffer)
 {
     size_t length = (size_t)10;
-    const char* original_str = my_str_get_cstr(&string);
 
-    my_str_resize(&string, length, length);
+    my_str_resize(&string, length, 'a');
+    const char* original_str = my_str_get_cstr(&string);
     size_t initial_size = my_str_size(&string);
     size_t initial_capacity = my_str_capacity(&string);
     
@@ -441,6 +441,7 @@ START_TEST(string_test_create){
     ck_assert_int_eq(my_str_create(&string, 10), 0);
     ck_assert_int_eq(my_str_capacity(&string), 10);
     ck_assert_int_eq(my_str_size(&string), 0);
+    my_str_free(&string);
 }END_TEST
 
 START_TEST(string_test_create_giant_buffer){
@@ -562,6 +563,21 @@ START_TEST(string_test_insert_c)
     ck_assert_str_eq(my_str_get_cstr(&string), "abaaaa");
 }END_TEST
 
+START_TEST(string_test_insert_c_out_of_bounds)
+{
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_c(&string, 'b', 6), -1);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+}END_TEST
+
+START_TEST(string_test_insert_c_last_index)
+{
+    my_str_resize(&string, 5, 'a');
+    ck_assert_int_eq(my_str_insert_c(&string, 'b', 5), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaab");
+
+}END_TEST
+
 START_TEST(string_test_insert)
 {
     my_str_resize(&string, 5, 'a');
@@ -582,6 +598,7 @@ START_TEST(string_test_insert_cstr){
     ck_assert_int_eq(my_str_insert_cstr(&string, "bb", 2), 0);
     ck_assert_str_eq(my_str_get_cstr(&string), "aabbaaa");
 }END_TEST
+
 START_TEST(string_test_insert_empty_cstr){
     my_str_resize(&string, 5, 'a');
     ck_assert_int_eq(my_str_insert_cstr(&string, "", 2), 0);
@@ -600,9 +617,13 @@ START_TEST(string_test_insert_cstr_out_of_bounds){
 
 START_TEST(string_test_append){
     my_str_resize(&string, 5, 'a');
-    my_str_resize(&string2, 6, 'b');
+    ck_assert_str_eq(my_str_get_cstr(&string), "aaaaa");
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_str_eq(my_str_get_cstr(&string2), "bbbb");
     ck_assert_int_eq(my_str_append(&string, &string2), 0);
     ck_assert_str_eq(my_str_get_cstr(&string), "aaaaabbbb");
+    ck_assert_str_eq(my_str_get_cstr(&string2), "bbbb");
+
 }END_TEST
 START_TEST(string_test_append_empty){
     my_str_resize(&string, 5, 'a');
@@ -632,6 +653,95 @@ START_TEST(string_test_append_cstr_to_empty){
     my_str_resize(&string, 0, 'a');
     ck_assert_int_eq(my_str_append_cstr(&string, "bbb"), 0);
     ck_assert_str_eq(my_str_get_cstr(&string), "bbb");
+}END_TEST
+
+
+
+
+START_TEST(string_test_substr){
+    my_str_from_cstr(&string, "abcdefg", 10);
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 2, 4), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "cd");
+}END_TEST
+
+START_TEST(string_test_substr_from_empty){
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 2, 4), -1);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "bbbb");
+
+}END_TEST
+
+START_TEST(string_test_substr_out_of_bounds){
+    my_str_from_cstr(&string, "abcdefg", 10);
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 9, 4), -1);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "bbbb");
+}END_TEST
+
+START_TEST(string_test_substr_end_out_of_bounds){
+    my_str_from_cstr(&string, "abcdefg", 10);
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 2, 10), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "cdefg");
+
+}END_TEST
+
+START_TEST(string_test_substr_end_eq_beg){
+    my_str_from_cstr(&string, "abcdefg", 10);
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 4, 4), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "");
+
+}END_TEST
+
+START_TEST(string_test_substr_end_less_beg){
+    my_str_from_cstr(&string, "abcdefg", 10);
+    my_str_resize(&string2, 4, 'b');
+    ck_assert_int_eq(my_str_substr(&string, &string2, 4, 3), 0);
+    ck_assert_str_eq(my_str_get_cstr(&string2), "");
+
+}END_TEST
+
+
+
+START_TEST(string_test_substr_cstr){
+    char my_cstr[10];
+    my_str_resize(&string, 7, 'a');
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) 0, (size_t) 100), 0);
+    ck_assert_str_eq(my_cstr, "aaaaaaa");
+}END_TEST
+
+START_TEST(string_test_substr_cstr2){
+    char my_cstr[10];
+    my_str_resize(&string, 3, 'a');
+    my_str_resize(&string, 7, 'b');
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) 1, (size_t) 5), 0);
+    ck_assert_str_eq(my_cstr, "aabb");
+}END_TEST
+
+START_TEST(string_test_substr_cstr_from_empty){
+    char my_cstr[1];
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) 0, (size_t) 5), -1);
+    
+}END_TEST
+
+START_TEST(string_test_substr_cstr_out_of_bounds){
+    char my_cstr[1];
+    my_str_resize(&string, 3, 'a');
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) -2, (size_t) 5), -1);
+}END_TEST
+
+START_TEST(string_test_substr_cstr_out_of_bounds2){
+    char my_cstr[1];
+    my_str_resize(&string, 3, 'a');
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) 5, (size_t) 1), -1);
+}END_TEST
+
+START_TEST(string_test_substr_cstr_out_of_bounds3){
+    char my_cstr[1];
+    my_str_resize(&string, 3, 'a');
+    ck_assert_int_eq(my_str_substr_cstr(&string, my_cstr, (size_t) 100, (size_t) 200), -1);
 }END_TEST
 
 
@@ -677,11 +787,10 @@ Suite* string_modification_suite(void)
     tc_insert_c = tcase_create("String insert character test");
     tcase_add_checked_fixture(tc_insert_c, setup, teardown);
     tcase_add_test(tc_insert_c, string_test_insert_c);
-
+    tcase_add_test(tc_insert_c, string_test_insert_c_out_of_bounds);
+    tcase_add_test(tc_insert_c, string_test_insert_c_last_index);
     tc_insert_cstr = tcase_create("Insert cstring test");
-
     //FIXED free(): double free detected in tcache 2 FIXED
-
     tcase_add_checked_fixture(tc_insert_cstr, setup, teardown);
     tcase_add_test(tc_insert_cstr, string_test_insert_cstr);
     tcase_add_test(tc_insert_cstr, string_test_insert_empty_cstr);
@@ -691,21 +800,43 @@ Suite* string_modification_suite(void)
     tc_insert = tcase_create("Insert my_str_t test");
     tcase_add_checked_fixture(tc_insert, setup2, teardown2);
     tcase_add_test(tc_insert, string_test_insert);
+    tcase_add_test(tc_insert, string_test_insert_empty);
     
 
 
     tc_append = tcase_create("String append test");
-    //tcase_add_checked_fixture(tc_append, setup, teardown);
-    //tcase_add_test(tc_append, string_test_append);
-    // tcase_add_test(tc_append, string_test_append_empty);
-    // tcase_add_test(tc_append, string_test_append_to_empty);
+    tcase_add_checked_fixture(tc_append, setup2, teardown2);
+    tcase_add_test(tc_append, string_test_append);
+    tcase_add_test(tc_append, string_test_append_empty);
+    tcase_add_test(tc_append, string_test_append_to_empty);
 
     tc_append_cstr = tcase_create("Cstring append test");
-    // tcase_add_checked_fixture(tc_append_cstr, setup, teardown);
-    // tcase_add_test(tc_append_cstr, string_test_append_cstr);
-    // tcase_add_test(tc_append_cstr, string_test_append_empty_cstr);
-    // tcase_add_test(tc_append_cstr, string_test_append_cstr_to_empty);
+    tcase_add_checked_fixture(tc_append_cstr, setup2, teardown2);
+    tcase_add_test(tc_append_cstr, string_test_append_cstr);
+    tcase_add_test(tc_append_cstr, string_test_append_empty_cstr);
+    tcase_add_test(tc_append_cstr, string_test_append_cstr_to_empty);
 
+    tc_substr = tcase_create("Substring test");
+    tcase_add_checked_fixture(tc_substr, setup2, teardown2);
+    tcase_add_test(tc_substr, string_test_substr);
+    tcase_add_test(tc_substr, string_test_substr_from_empty);
+    tcase_add_test(tc_substr, string_test_substr_end_out_of_bounds);
+    tcase_add_test(tc_substr, string_test_substr_out_of_bounds);
+    tcase_add_test(tc_substr, string_test_substr_end_less_beg);
+    tcase_add_test(tc_substr, string_test_substr_end_eq_beg);
+
+
+
+    tc_substr_cstr = tcase_create("Substring c string test");
+    tcase_add_checked_fixture(tc_substr_cstr, setup, teardown);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr2);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr_from_empty);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr_out_of_bounds);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr_out_of_bounds2);
+    tcase_add_test(tc_substr_cstr, string_test_substr_cstr_out_of_bounds3);
+    
+    
     
     suite_add_tcase(suit, tc_pushback);
     suite_add_tcase(suit, tc_popback);
@@ -716,7 +847,8 @@ Suite* string_modification_suite(void)
     suite_add_tcase(suit, tc_insert);
     suite_add_tcase(suit, tc_append);
     suite_add_tcase(suit, tc_append_cstr);
-
+    suite_add_tcase(suit, tc_substr);
+    suite_add_tcase(suit, tc_substr_cstr);
 
 
     return suit;

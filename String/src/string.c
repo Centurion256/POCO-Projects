@@ -95,7 +95,7 @@ int my_str_putc(my_str_t *str, size_t index, char c)
 //! просто додати нульовий символ в кінці та повернути вказівник data.
 const char *my_str_get_cstr(my_str_t *str)
 {
-    str->data[str->size_m] = '\0';
+    // str->data[str->size_m] = '\0';
     return str->data;
 }
 
@@ -282,7 +282,7 @@ int my_str_append_cstr(my_str_t *str, const char *from)
     if(my_str_resize(str, my_str_size(str)+csize, 0)){
         return -2;
     }
-    memcpy(str->data+my_str_size(str), from, sizeof(char)*csize);
+    memcpy(str->data+sizeof(char)*(my_str_size(str)-csize), from, sizeof(char)*csize);
     
     return 0;
 }
@@ -300,10 +300,13 @@ int my_str_substr(const my_str_t *from, my_str_t *to, size_t beg, size_t end)
     if(beg>=my_str_size(from)||beg<0){
         return -1;
     }
-    if(end >= my_str_size(from)){
-        end = my_str_size(from)-1;
+    if(end<beg){
+        end = beg;
     }
-    my_str_clear(to);
+    if(end >= my_str_size(from)){
+        end = my_str_size(from);
+    }
+
     if(my_str_resize(to, end-beg, 0)){
         return -2;
     }
@@ -322,9 +325,10 @@ int my_str_substr_cstr(const my_str_t *from, char *to, size_t beg, size_t end)
         return -1;
     }
     if(end >= my_str_size(from)){
-        end = my_str_size(from)-1;
+        end = my_str_size(from);
     }
-    memset(to+sizeof(char) *(end-beg+1), '\0', sizeof(char)*1);
+    memcpy(to, from->data+(sizeof(char)*beg), sizeof(char) *(end-beg));
+    memset(to + (sizeof(char) * (end-beg+1)), '\0', sizeof(char)*1);
     return 0;
 }
 
@@ -678,19 +682,3 @@ int my_str_from_cstr(my_str_t* str, const char* cstr, size_t buf_size){
     return 0;
 }
 
-/*
-int main(int argc, char *argv[])
-{
-    printf("I'm at the beginning!\n");
-    char *word = argv[1];
-    puts(argv[1]);
-    size_t buf_size = (size_t)atoi(argv[2]);
-    printf("%u\n", buf_size);
-    my_str_t string;
-    my_str_create(&string, buf_size);
-    size_t leng = (size_t)my_str_cstr_len(word);
-    printf("%u\n", leng);
-    my_str_resize(&string, leng, 'R');
-    my_str_write(&string, stdout);
-}
-*/
